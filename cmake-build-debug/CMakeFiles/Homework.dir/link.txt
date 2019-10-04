@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/Homework.dir/main.cpp.o CMakeFiles/Homework.dir/matrix.cpp.o  -o Homework 
