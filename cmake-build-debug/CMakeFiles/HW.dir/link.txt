@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/HW.dir/src/HW1/LSE.cpp.o  -o HW 

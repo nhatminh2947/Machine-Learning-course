@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/HW1_Newton.dir/src/HW1/Newton.cpp.o  -o HW1_Newton hw_lib/libMatrix_lib.a 

@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/HW1.dir/src/main.cpp.o CMakeFiles/HW1.dir/src/lib/matrix.cpp.o  -o HW1 

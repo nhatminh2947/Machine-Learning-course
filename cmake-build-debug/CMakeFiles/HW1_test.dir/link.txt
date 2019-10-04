@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/HW1_test.dir/test/matrix.cpp.o  -o HW1_test hw_lib/libMatrix_lib.a lib/libgtestd.a lib/libgtest_maind.a lib/libgtestd.a -lpthread 
