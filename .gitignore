@@ -3,4 +3,3 @@ Submission/
 cmake-build-debug/
 .idea/
 CMakeLists.txt
-CMakeLists.txt.in
