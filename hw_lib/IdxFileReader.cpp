@@ -16,7 +16,7 @@ int IdxFileReader::reverse(int i) {
     return ((int) c1 << 24U) + ((int) c2 << 16U) + ((int) c3 << 8U) + c4;
 }
 
-std::vector<Matrix> IdxFileReader::ReadImages(const std::string &path, int threshold) {
+std::vector<Matrix> IdxFileReader::ReadImages(const std::string &path) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
     std::vector<Matrix> images;
 
@@ -31,7 +31,9 @@ std::vector<Matrix> IdxFileReader::ReadImages(const std::string &path, int thres
     unsigned char pixel;
 
     file.read((char *) &magic_number, sizeof(magic_number));
+    std::cout << magic_number << std::endl;
     file.read((char *) &number_of_images, sizeof(number_of_images));
+    std::cout << number_of_images << std::endl;
     file.read((char *) &n_rows, sizeof(n_rows));
     file.read((char *) &n_cols, sizeof(n_cols));
 
@@ -44,7 +46,7 @@ std::vector<Matrix> IdxFileReader::ReadImages(const std::string &path, int thres
         for (int i = 0; i < n_rows; ++i) {
             for (int j = 0; j < n_cols; ++j) {
                 file.read((char *) &pixel, sizeof(pixel));
-                m(i, j) = (int) (pixel >= threshold);
+                m(i, j) = int(pixel);
             }
         }
         images.emplace_back(m);
