@@ -31,9 +31,7 @@ std::vector<Matrix> IdxFileReader::ReadImages(const std::string &path) {
     unsigned char pixel;
 
     file.read((char *) &magic_number, sizeof(magic_number));
-    std::cout << magic_number << std::endl;
     file.read((char *) &number_of_images, sizeof(number_of_images));
-    std::cout << number_of_images << std::endl;
     file.read((char *) &n_rows, sizeof(n_rows));
     file.read((char *) &n_cols, sizeof(n_cols));
 
@@ -42,14 +40,14 @@ std::vector<Matrix> IdxFileReader::ReadImages(const std::string &path) {
     n_cols = reverse(n_cols);
 
     for (int k = 0; k < number_of_images; ++k) {
-        Matrix m = Matrix(n_rows, n_cols);
+        Matrix m(28, 28);
         for (int i = 0; i < n_rows; ++i) {
             for (int j = 0; j < n_cols; ++j) {
                 file.read((char *) &pixel, sizeof(pixel));
                 m(i, j) = int(pixel);
             }
         }
-        images.emplace_back(m);
+        images.push_back(m);
     }
 
     return images;
@@ -74,7 +72,7 @@ std::vector<int> IdxFileReader::ReadLabels(const std::string &path) {
 
     for (int k = 0; k < number_of_labels; ++k) {
         file.read((char *) &pixel, sizeof(pixel));
-        labels.emplace_back((int) pixel);
+        labels.push_back((int) pixel);
     }
 
     return labels;
