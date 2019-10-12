@@ -10,17 +10,16 @@
 #include <matrix.h>
 #include "NaiveBayes.h"
 
-class MultinominalNaiveBayes : public NaiveBayes {
+class MultinomialNaiveBayes : public NaiveBayes {
 private:
 	const int N_CLASSES = 10;
-	const int N_FEATURES = 28 * 28 * 32;
-	Matrix _prop_class = Matrix(N_CLASSES, 1);
+	const int N_FEATURES = N_ROWS * N_COLS * 32;
+	Matrix _prior = Matrix(N_CLASSES, 1);
 	Matrix _weights = Matrix(N_CLASSES, N_FEATURES);
 	Matrix _count_feature_class = Matrix(N_CLASSES, 1);
-	Matrix _count_class = Matrix(N_CLASSES, 1);
 	int _train_size{0};
 public:
-	MultinominalNaiveBayes();
+	MultinomialNaiveBayes();
 
 	void fit(std::vector<Matrix> X, std::vector<int> y) override;
 
@@ -28,8 +27,6 @@ public:
 
 	std::vector<double> predict_log_proba(Matrix x, bool normalize) override;
 };
-
-std::vector<double> normalize(std::vector<double> v);
 
 
 #endif //MACHINE_LEARNING_COURSE_MNISTNAIVEBAYESCLASSIFIER_H

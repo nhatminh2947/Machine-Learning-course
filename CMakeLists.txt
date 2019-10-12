@@ -40,7 +40,7 @@ endif ()
 
 add_executable(HW1_LSE src/HW1/LSE.cpp)
 add_executable(HW1_Newton src/HW1/Newton.cpp)
-add_executable(hw2 src/HW2/main.cpp src/HW2/MultinominalNaiveBayes.cpp src/HW2/NaiveBayesClassifier.cpp)
+add_executable(hw2 src/HW2/main.cpp src/HW2/MultinomialNaiveBayes.cpp src/HW2/GaussianNaiveBayes.cpp src/HW2/NaiveBayes.cpp)
 
 include_directories(hw_lib)
 add_subdirectory(hw_lib)
