@@ -15,7 +15,7 @@ Matrix bin_image(Matrix image) {
         }
     }
 
-    return image;
+    return result;
 }
 
 std::vector<Matrix> ExtractFeatures(const std::vector<Matrix> &images) {
@@ -39,15 +39,16 @@ int main() {
     std::vector<Matrix> test_image_features = ExtractFeatures(test_images);
 
     MultinominalNaiveBayes classifier;
-    GaussianNaiveBayes gnb;
+//    GaussianNaiveBayes classifier;
 //    classifier.fit(train_image_features, train_labels);
-    gnb.fit(train_images, train_labels);
+	classifier.fit(train_image_features, train_labels);
+	std::cout << "Completed Training" << std::endl;
     int error_rate = 0;
 
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 10000; ++i) {
         std::cout << "Test " << i << std::endl;
         int test_image_id = i;
-        int prediction = gnb.predict(test_images[test_image_id]);
+        int prediction = classifier.predict(test_image_features[test_image_id]);
         std::cout << "Prediction: " << prediction << ", Ans: " << test_labels[test_image_id] << std::endl;
 
         error_rate += (prediction != test_labels[test_image_id]);
