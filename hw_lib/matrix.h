@@ -17,7 +17,13 @@ public:
 
     explicit Matrix(int n);
 
+    Matrix() = default;
+
     Matrix T();
+
+    Matrix flat();
+
+    Matrix power(int x);
 
     Matrix operator+(Matrix const &b);
 
@@ -26,6 +32,8 @@ public:
     Matrix operator-(Matrix const &b);
 
     Matrix operator*(double const &lambda);
+
+    Matrix operator/(double const &b);
 
     friend bool operator==(Matrix const &a, Matrix const &b);
 

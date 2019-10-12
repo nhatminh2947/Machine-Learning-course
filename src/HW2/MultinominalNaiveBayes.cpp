@@ -37,38 +37,8 @@ void MNISTNaiveBayesClassifier::fit(std::vector<Matrix> X, std::vector<int> y) {
 int MNISTNaiveBayesClassifier::predict(Matrix x) {
     int prediction = -1;
     double min_log_proba = INT64_MAX;
-    double max_proba = INT64_MIN;
 
-//    for (int class_id = 0; class_id < N_CLASSES; ++class_id) {
-////        double likelihood = 1.0;
-//        double log_likelihood = 0;
-//        double prior = _prop_class(class_id, 0);
-//        for (int feature_id = 0; feature_id < N_FEATURES; ++feature_id) {
-////            likelihood += (x(feature_id, 0) * _weights(class_id, feature_id) / _count_feature_class(class_id, 0));
-////            likelihood *= (std::pow(
-////                    (_weights(class_id, feature_id) + 1) / (_count_feature_class(class_id, 0) + N_FEATURES),
-////                    x(feature_id / 28, feature_id % 28)));
-//
-//            log_likelihood += (x(feature_id / 28, feature_id % 28) *
-//                               (log(_weights(class_id, feature_id) + 1)
-//                                - log(_count_feature_class(class_id, 0) + N_FEATURES)));
-//        }
-//
-//        double log_posterior = log_likelihood + log(prior);
-//        std::cout << class_id << ": " << log_posterior << std::endl;
-//
-////        if (min_log_proba > log_posterior) {
-////            min_log_proba = log_posterior;
-////            prediction = class_id;
-////        }
-//
-//        if (max_proba < log_posterior) {
-//            max_proba = log_posterior;
-//            prediction = class_id;
-//        }
-//    }
-
-    std::vector<double> log_proba = predict_log_proba(x, true);
+    std::vector<double> log_proba = predict_log_proba(x);
 
     for (int class_id = 0; class_id < N_CLASSES; ++class_id) {
         std::cout << class_id << ": " << log_proba[class_id] << std::endl;
@@ -101,6 +71,32 @@ std::vector<double> MNISTNaiveBayesClassifier::predict_log_proba(Matrix x, bool 
 
     if(norm) log_proba = normalize(log_proba);
     return log_proba;
+}
+
+std::vector<Matrix> MNISTNaiveBayesClassifier::ExtractFeatures(const std::vector<Matrix> &images) {
+    std::vector<Matrix> result;
+    result.reserve(images.size());
+
+    for (auto image : images) {
+        result.push_back(bin_image(image));
+    }
+
+    return result;
+}
+
+Matrix MNISTNaiveBayesClassifier::bin_image(Matrix image) {
+    Matrix result(28, 28);
+    for (int i = 0; i < 28; ++i) {
+        for (int j = 0; j < 28; ++j) {
+            result(i, j)  = int(image(i, j)) / 8;
+        }
+    }
+
+    return image;
+}
+
+MNISTNaiveBayesClassifier::MNISTNaiveBayesClassifier(int mode) {
+    _mode = mode;
 }
 
 std::vector<double> normalize(std::vector<double> v) {

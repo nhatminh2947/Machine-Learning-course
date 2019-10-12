@@ -292,6 +292,46 @@ double Matrix::max(Matrix const &m) {
     return result;
 }
 
+Matrix Matrix::operator/(double const &b) {
+    Matrix result(this->getRows(), this->getCols());
+
+    for (int i = 0; i < result.getRows(); ++i) {
+        for (int j = 0; j < result.getCols(); ++j) {
+            result(i, j) = this->operator()(i, j) / b;
+        }
+    }
+
+    return result;
+}
+
+Matrix Matrix::flat() {
+    Matrix result(1, this->getCols() * this->getRows());
+
+    for (int i = 0; i < this->getCols() * this->getRows(); ++i) {
+        int r = i / this->getCols();
+        int c = i % this->getCols();
+        result(0, i) = this->operator()(r, c);
+    }
+
+    return result;
+}
+
+Matrix Matrix::power(int x) {
+    Matrix result( this->getRows(),this->getCols());
+
+    for (int i = 0; i < result.getRows(); ++i) {
+        for (int j = 0; j < result.getCols(); ++j) {
+            double value = 1.0;
+            for (int k = 0; k < x; ++k) {
+                value *= this->operator()(i, j);
+            }
+
+            result(i, j) = value;
+        }
+    }
+
+    return result;}
+
 SquareMatrix::SquareMatrix(int n) : Matrix(n) {
 
 }

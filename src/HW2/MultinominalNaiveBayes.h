@@ -18,8 +18,14 @@ private:
     Matrix _count_feature_class = Matrix(N_CLASSES, 1);
     Matrix _count_class = Matrix(N_CLASSES, 1);
     int _train_size{0};
+    int _mode;
+
+    static Matrix bin_image(Matrix image);
+    std::vector<Matrix> ExtractFeatures(const std::vector<Matrix> &images);
+
 public:
     MNISTNaiveBayesClassifier();
+    MNISTNaiveBayesClassifier(int mode);
     void fit(std::vector<Matrix> X, std::vector<int> y);
     int predict(Matrix x);
     std::vector<double> predict_log_proba(Matrix x, bool normalize=true);
