@@ -26,6 +26,8 @@ public:
 	int predict(Matrix x) override;
 
 	std::vector<double> predict_log_proba(Matrix x, bool normalize) override;
+
+	void imagination() override ;
 };
 
 

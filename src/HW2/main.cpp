@@ -62,21 +62,23 @@ void hw1(int mode) {
 	}
 
 	std::cout << "Imagination of numbers in Bayesian classifier:\n" << std::endl;
-	for (int class_id = 0; class_id < 10; ++class_id) {
-		std::cout << class_id << ":" << std::endl;
-		for (int i = 0; i < 10000; ++i) {
-			if (test_labels[i] == class_id) {
-				for (int j = 0; j < 28; ++j) {
-					for (int k = 0; k < 28; ++k) {
-						std::cout << ((test_images[i](j, k) < (mode ? 128 : 16)) ? 0 : 1) << " ";
-					}
-					std::cout << std::endl;
-				}
-				std::cout << std::endl;
-				break;
-			}
-		}
-	}
+//	for (int class_id = 0; class_id < 10; ++class_id) {
+//		std::cout << class_id << ":" << std::endl;
+//		for (int i = 0; i < 10000; ++i) {
+//			if (test_labels[i] == class_id) {
+//				for (int j = 0; j < 28; ++j) {
+//					for (int k = 0; k < 28; ++k) {
+//						std::cout << ((test_images[i](j, k) < (mode ? 128 : 16)) ? 0 : 1) << " ";
+//					}
+//					std::cout << std::endl;
+//				}
+//				std::cout << std::endl;
+//				break;
+//			}
+//		}
+//	}
+
+	classifier->imagination();
 
 	std::cout << "Error rate: " << error_rate * 1.0 / 10000 << " (" << error_rate << "/" << "10000)" << std::endl;
 }

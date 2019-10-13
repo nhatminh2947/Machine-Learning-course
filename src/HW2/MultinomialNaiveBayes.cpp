@@ -71,6 +71,29 @@ std::vector<double> MultinomialNaiveBayes::predict_log_proba(Matrix x, bool norm
 	return log_proba;
 }
 
+void MultinomialNaiveBayes::imagination() {
+	for (int class_id = 0; class_id < N_CLASSES; ++class_id) {
+		std::cout << class_id << ":" << std::endl;
+		for (int row_id = 0; row_id < N_ROWS; ++row_id) {
+			for (int col_id = 0; col_id < N_COLS; ++col_id) {
+				double expected_pixel_0 = 0;
+				double expected_pixel_1 = 0;
+				for (int bin = 0; bin < 32; ++bin) {
+					int feature_id = bin * 28 * 28 + row_id * 28 + col_id;
+
+					if (bin < 16) {
+						expected_pixel_0 += _weights(class_id, feature_id);
+					} else expected_pixel_1 += _weights(class_id, feature_id);
+				}
+
+				std::cout << int(expected_pixel_0 < expected_pixel_1) << " ";
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	}
+}
+
 MultinomialNaiveBayes::MultinomialNaiveBayes() = default;
 
 

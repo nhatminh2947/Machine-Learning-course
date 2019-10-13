@@ -22,6 +22,8 @@ public:
 
 	virtual std::vector<double> predict_log_proba(Matrix x, bool normalize) = 0;
 
+	virtual void imagination() = 0;
+
 	std::vector<double> normalize(std::vector<double> v);
 };
 

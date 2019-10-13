@@ -12,7 +12,6 @@ void GaussianNaiveBayes::fit(std::vector<Matrix> X, std::vector<int> y) {
 	for (int id = 0; id < _train_size; ++id) {
 		_prior(y[id], 0)++;
 	}
-	_prior = _prior / _train_size;
 
 	for (int i = 0; i < N_CLASSES; ++i) {
 		mu[i] = sigma[i] = Matrix(28, 28);
@@ -23,8 +22,13 @@ void GaussianNaiveBayes::fit(std::vector<Matrix> X, std::vector<int> y) {
 	}
 
 	for (int i = 0; i < N_CLASSES; ++i) {
-		mu[i] = mu[i] / _train_size;
+//		std::cout << mu[i] << std::endl;
+		mu[i] = mu[i] / _prior(i, 0);
+
+//		std::cout << mu[i] << std::endl;
 		_mean[i] = mu[i].flat();
+
+//		std::cout << _mean[i] << std::endl;
 	}
 
 	for (int i = 0; i < _train_size; ++i) {
@@ -55,6 +59,8 @@ void GaussianNaiveBayes::fit(std::vector<Matrix> X, std::vector<int> y) {
 		sigma[i] = sigma[i] / _train_size;
 		_variance[i] = sigma[i].flat();
 	}
+
+	_prior = _prior / _train_size;
 }
 
 int GaussianNaiveBayes::predict(Matrix x) {
@@ -87,6 +93,7 @@ std::vector<double> GaussianNaiveBayes::predict_log_proba(Matrix x, bool norm) {
 			probability += log(1.0 / (sqrt(_variance[i](0, j) * 2 * M_PI))) - (0.5 * pow(x(0, j) - _mean[i](0, j), 2) / _variance[i](0, j));
 		}
 		probability += log(_prior(i, 0));
+
 		result.push_back(probability);
 	}
 
@@ -101,15 +108,17 @@ GaussianNaiveBayes::GaussianNaiveBayes() {
 	}
 }
 
-std::vector<double> normalize(std::vector<double> v) {
-	double sum = 0;
-	for (double i : v) {
-		sum += i;
-	}
+void GaussianNaiveBayes::imagination() {
+	for (int class_id = 0; class_id < N_CLASSES; ++class_id) {
+		std::cout << class_id << ":" << std::endl;
+		for (int row_id = 0; row_id < N_ROWS; ++row_id) {
+			for (int col_id = 0; col_id < N_COLS; ++col_id) {
+				int feature_id = 28 * row_id + col_id;
 
-	for (double &i : v) {
-		i /= sum;
+				std::cout << int( _mean[class_id](0, feature_id) >= 128) << " ";
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
 	}
-
-	return v;
 }
