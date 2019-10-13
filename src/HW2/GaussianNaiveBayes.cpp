@@ -25,7 +25,6 @@ void GaussianNaiveBayes::fit(std::vector<Matrix> X, std::vector<int> y) {
 	for (int i = 0; i < N_CLASSES; ++i) {
 		mu[i] = mu[i] / _train_size;
 		_mean[i] = mu[i].flat();
-		std::cout << _mean[i];
 	}
 
 	for (int i = 0; i < _train_size; ++i) {
@@ -37,7 +36,7 @@ void GaussianNaiveBayes::fit(std::vector<Matrix> X, std::vector<int> y) {
 		double min_sigma = INT64_MAX;
 		for (int i = 0; i < N_ROWS; ++i) {
 			for (int j = 0; j < N_COLS; ++j) {
-				if(sigma[k](i, j) != 0) {
+				if (sigma[k](i, j) != 0) {
 					min_sigma = std::min(min_sigma, sigma[k](i, j));
 				}
 			}
@@ -45,18 +44,16 @@ void GaussianNaiveBayes::fit(std::vector<Matrix> X, std::vector<int> y) {
 
 		for (int i = 0; i < N_ROWS; ++i) {
 			for (int j = 0; j < N_COLS; ++j) {
-				if(sigma[k](i, j) == 0) {
+				if (sigma[k](i, j) == 0) {
 					sigma[k](i, j) = min_sigma;
 				}
 			}
 		}
 	}
 
-	std::cout << "Variance" << std::endl;
 	for (int i = 0; i < N_CLASSES; ++i) {
 		sigma[i] = sigma[i] / _train_size;
 		_variance[i] = sigma[i].flat();
-		std::cout << _variance[i];
 	}
 }
 

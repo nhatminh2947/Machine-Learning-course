@@ -7,20 +7,26 @@
 
 void MultinomialNaiveBayes::fit(std::vector<Matrix> X, std::vector<int> y) {
 	_train_size = X.size();
-	std::cout << _train_size << std::endl;
 	for (int id = 0; id < _train_size; ++id) {
 		_prior(y[id], 0)++;
 		for (int row_id = 0; row_id < N_ROWS; ++row_id) {
 			for (int col_id = 0; col_id < N_COLS; ++col_id) {
 				int feature_id = int(X[id](row_id, col_id)) * N_ROWS * N_COLS + row_id * N_ROWS + col_id;
 				_weights(y[id], feature_id) += 1;
-				_count_feature_class(y[id], 0) += 1;
 			}
 		}
 	}
 
 	for (int i = 0; i < N_CLASSES; ++i) {
 		_prior(i, 0) = _prior(i, 0) / _train_size;
+		for (int row_id = 0; row_id < N_ROWS; ++row_id) {
+			for (int col_id = 0; col_id < N_COLS; ++col_id) {
+				for (int bin = 0; bin < 32; ++bin) {
+					_count_feature_class(i, 0) += _weights(i, bin * N_ROWS * N_COLS + row_id * N_ROWS + col_id);
+				}
+			}
+		}
+
 	}
 }
 
