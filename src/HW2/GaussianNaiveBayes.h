@@ -11,20 +11,21 @@
 #include "NaiveBayes.h"
 #include <cmath>
 
-class GaussianNaiveBayes : public NaiveBayes{
+class GaussianNaiveBayes : public NaiveBayes {
 private:
-    Matrix _mean[10]{};
-    Matrix _variance[10]{};
-    Matrix _prior = Matrix(10, 1);
+	Matrix _mean[10]{};
+	Matrix _variance[10]{};
+	Matrix _prior = Matrix(10, 1);
 public:
-    GaussianNaiveBayes();
+	GaussianNaiveBayes();
 
-    void fit(std::vector<Matrix> X, std::vector<int> y) override;
+	void fit(std::vector<Matrix> X, std::vector<int> y) override;
 
-    int predict(Matrix x) override;
+	int predict(Matrix x) override;
 
-    std::vector<double> predict_log_proba(Matrix x, bool norm) override;
+	std::vector<double> predict_log_proba(Matrix x, bool norm) override;
 };
+
 std::vector<double> normalize(std::vector<double> v);
 
 #endif //MACHINE_LEARNING_COURSE_GAUSSIANNAIVEBAYES_H

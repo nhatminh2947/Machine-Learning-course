@@ -68,7 +68,7 @@ void hw1(int mode) {
 			if (test_labels[i] == class_id) {
 				for (int j = 0; j < 28; ++j) {
 					for (int k = 0; k < 28; ++k) {
-						std::cout << ((test_images[i](j, k) < 128) ? 0 : 1) << " ";
+						std::cout << ((test_images[i](j, k) < (mode ? 128 : 16)) ? 0 : 1) << " ";
 					}
 					std::cout << std::endl;
 				}
