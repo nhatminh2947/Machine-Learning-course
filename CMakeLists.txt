@@ -43,12 +43,19 @@ add_executable(HW1_Newton src/HW1/Newton.cpp)
 add_executable(hw2 src/HW2/main.cpp src/HW2/OnlineLearning.cpp src/HW2/MultinomialNaiveBayes.cpp src/HW2/GaussianNaiveBayes.cpp
         src/HW2/NaiveBayes.cpp)
 
+add_executable(rdg src/HW3/GaussianDataGenerator.cpp src/HW3/GaussianDataGenerator.h src/HW3/main.cpp src/HW3/PolynomialDataGenerator.cpp src/HW3/PolynomialDataGenerator.h)
+add_executable(seq src/HW3/GaussianDataGenerator.cpp src/HW3/GaussianDataGenerator.h src/HW3/PolynomialDataGenerator.cpp src/HW3/PolynomialDataGenerator.h src/HW3/SequentialEstimator.cpp)
+add_executable(blr src/HW3/GaussianDataGenerator.cpp src/HW3/GaussianDataGenerator.h src/HW3/PolynomialDataGenerator.cpp src/HW3/PolynomialDataGenerator.h src/HW3/BayesianLinearRegression.cpp)
+
 include_directories(hw_lib)
 add_subdirectory(hw_lib)
 
 target_link_libraries(HW1_LSE Matrix_lib)
 target_link_libraries(HW1_Newton Matrix_lib)
 target_link_libraries(hw2 Matrix_lib)
+target_link_libraries(rdg Matrix_lib)
+target_link_libraries(seq Matrix_lib)
+target_link_libraries(blr Matrix_lib)
 
 add_executable(HW1_test test/matrix.cpp)
 target_link_libraries(HW1_test Matrix_lib)
