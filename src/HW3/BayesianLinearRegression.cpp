@@ -4,13 +4,15 @@
 
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include <zconf.h>
 #include "GaussianDataGenerator.h"
 #include "PolynomialDataGenerator.h"
 
 int main(int argc, const char *argv[]) {
-    double a = 1;
+    double a = 3;
     double b = 1;
-    int n = 4;
+    int n = 3;
 
     for (int i = 1; i < argc; i++) {
         std::string para(argv[i]);
@@ -25,9 +27,7 @@ int main(int argc, const char *argv[]) {
 
     Matrix W(n, 1);
     Matrix mean(n, 1);
-    Matrix covar = (1 / a) * IdentityMatrix(n);
-
-    GaussianDataGenerator gdg(0, 1 / b);
+    Matrix covar = (1 / b) * IdentityMatrix(n);
 
     for (int i = 0; i < n; ++i) {
         std::cout << "w[" << i << "] = ";
@@ -40,25 +40,42 @@ int main(int argc, const char *argv[]) {
     std::uniform_real_distribution<double> distribution = std::uniform_real_distribution<double>(-1, 1);
     std::default_random_engine generator;
 
-    for (int i = 0; i < 1000000; ++i) {
+    std::ofstream file_weight("../src/HW3/weights.txt", std::ios::trunc | std::ios::out);
+    remove("../src/HW3/data.txt");
+    std::ofstream file_data("../src/HW3/data.txt", std::ios::app | std::ios::out);
+    std::cout << std::setprecision(10);
+    Matrix covar_prev = covar;
+    Matrix mean_prev = mean;
+    for (int i = 0; i < 100; ++i) {
+        file_weight << n << std::endl;
         double x = distribution(generator);
         double y = pdg.generate(x);
+        file_data << std::setprecision(10) << x << " " << y << std::endl;
 
         std::cout << "Add data point (" << x << ", " << y << "):" << std::endl << std::endl;
 
         Matrix X = Matrix::ToDesignMatrix(x, n);
-        Matrix covar_prev = covar;
-        Matrix mean_prev = mean;
-        covar = (covar_prev.inverse() + b * X * X.T()).inverse();
+        covar = (covar_prev.inverse() + b * (X * X.T())).inverse();
         mean = covar * (covar_prev.inverse() * mean_prev + b * y * X);
 
         std::cout << "Posterior mean:" << std::endl;
         std::cout << mean << std::endl;
-
+        file_weight << std::setprecision(10) << mean;
         std::cout << "Posterior variance:" << std::endl;
         std::cout << covar << std::endl;
+        file_weight << std::setprecision(10) << covar << std::endl;
 
-        std::cout << "Predictive distribution ~ N(0.62305, 1.34848)" << std::endl;
+        std::cout << "Predictive distribution ~ N(" << sum(mean.T() * X) << ", " << 1 / b + sum(X.T() * covar * X)
+                  << ")" << std::endl;
         std::cout << "--------------------------------------------------\n";
+
+        usleep(100000);
+        file_weight.seekp(std::ios::beg);
+
+        covar_prev = covar;
+        mean_prev = mean;
     }
+
+    file_data.close();
+    file_weight.close();
 }
