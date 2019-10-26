@@ -179,12 +179,12 @@ Matrix Matrix::operator*(const double &lambda) {
     return result;
 }
 
-Matrix operator*(double const &lambda, Matrix const &b) {
+Matrix operator*(double const &a, Matrix const &b) {
     Matrix result(b.getRows(), b.getCols());
 
     for (int i = 0; i < b.getRows(); ++i) {
         for (int j = 0; j < b.getCols(); ++j) {
-            result(i, j) = lambda * b(i, j);
+            result(i, j) = a * b(i, j);
         }
     }
 
@@ -331,6 +331,15 @@ Matrix Matrix::power(int x) {
     }
 
     return result;}
+
+Matrix Matrix::ToDesignMatrix(double x, int basis) {
+    Matrix X(basis, 1);
+    for (int i = 0; i < basis; ++i) {
+        X(i, 0) = pow(x, i);
+    }
+
+    return X;
+}
 
 SquareMatrix::SquareMatrix(int n) : Matrix(n) {
 

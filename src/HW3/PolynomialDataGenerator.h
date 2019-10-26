@@ -21,6 +21,8 @@ public:
     PolynomialDataGenerator(int n, double a, Matrix W);
 
     double generate();
+
+    double generate(double x);
 };
 
 

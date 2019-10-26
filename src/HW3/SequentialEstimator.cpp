@@ -30,7 +30,7 @@ int main(int argc, const char *argv[]) {
               << std::endl << std::endl;
 
     std::cout << std::setprecision(15) << std::fixed;
-    for (int i = 0; i < 1000000; ++i) {
+    for (int i = 0; i < 10000000; ++i) {
         double new_data = gdg.generate();
 
         count++;

@@ -16,6 +16,16 @@ double PolynomialDataGenerator::generate() {
     return sum(_W.T() * X) + _gdg.generate();
 }
 
+double PolynomialDataGenerator::generate(double x) {
+    std::default_random_engine generator;
+    Matrix X(_n, 1);
+    for (int i = 0; i < _n; ++i) {
+        X(i, 0) = pow(x, i);
+    }
+
+    return sum(_W.T() * X) + _gdg.generate();
+}
+
 PolynomialDataGenerator::PolynomialDataGenerator(int n, double a, Matrix W) {
     distribution = std::uniform_real_distribution<double>(-1, 1);
     _W = W;

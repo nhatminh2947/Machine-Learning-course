@@ -60,6 +60,8 @@ public:
     int getCols() const;
 
     static Matrix random(int n, int m);
+
+    static Matrix ToDesignMatrix(double x, int basis);
 };
 
 class IdentityMatrix : public Matrix {
