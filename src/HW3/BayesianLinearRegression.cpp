@@ -46,7 +46,7 @@ int main(int argc, const char *argv[]) {
     std::cout << std::setprecision(10);
     Matrix covar_prev = covar;
     Matrix mean_prev = mean;
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 10000; ++i) {
         file_weight << n << std::endl;
         double x = distribution(generator);
         double y = pdg.generate(x);
@@ -55,8 +55,8 @@ int main(int argc, const char *argv[]) {
         std::cout << "Add data point (" << x << ", " << y << "):" << std::endl << std::endl;
 
         Matrix X = Matrix::ToDesignMatrix(x, n);
-        covar = (covar_prev.inverse() + b * (X * X.T())).inverse();
-        mean = covar * (covar_prev.inverse() * mean_prev + b * y * X);
+        covar = (covar_prev.inverse() + a * (X * X.T())).inverse();
+        mean = covar * (covar_prev.inverse() * mean_prev + a * y * X);
 
         std::cout << "Posterior mean:" << std::endl;
         std::cout << mean << std::endl;
@@ -65,7 +65,7 @@ int main(int argc, const char *argv[]) {
         std::cout << covar << std::endl;
         file_weight << std::setprecision(10) << covar << std::endl;
 
-        std::cout << "Predictive distribution ~ N(" << sum(mean.T() * X) << ", " << 1 / b + sum(X.T() * covar * X)
+        std::cout << "Predictive distribution ~ N(" << sum(mean.T() * X) << ", " << a + sum(X.T() * covar * X)
                   << ")" << std::endl;
         std::cout << "--------------------------------------------------\n";
 

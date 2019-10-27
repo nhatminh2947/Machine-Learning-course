@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+a = 3
 while 1:
     data = open('data.txt', 'r').read()
     lines = data.split('\n')
@@ -32,7 +32,7 @@ while 1:
         x_pred = np.vstack((x_pred, np.linspace(-2, 2, n_pred) ** i))
 
     pred_mean = mean.T @ x_pred
-    pred_var = np.sum(1 / 3 + x_pred.T @ covar * x_pred.T, axis=1)
+    pred_var = np.sum(a + x_pred.T @ covar * x_pred.T, axis=1)
 
     # print(pred_mean)
     # print(pred_var)
