@@ -10,9 +10,9 @@
 #include "PolynomialDataGenerator.h"
 
 int main(int argc, const char *argv[]) {
-    double a = 1;
-    double b = 100;
-    int n = 4;
+    double a = 3;
+    double b = 1;
+    int n = 3;
 
     for (int i = 1; i < argc; i++) {
         std::string para(argv[i]);
