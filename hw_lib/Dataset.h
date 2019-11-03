@@ -26,11 +26,11 @@ class Dataset {
 private:
 	std::vector<Point> data;
 public:
-	void add(Point point);
+	void Add(Point point);
 
-	Matrix toDesignMatrix(int bases = 2);
+	Matrix ToDesignMatrix(int bases = 2);
 
-	Matrix labels();
+	Matrix GetLabels();
 };
 
 

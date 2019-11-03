@@ -17,11 +17,11 @@ double Point::getY() const {
 	return _y;
 }
 
-void Dataset::add(Point point) {
+void Dataset::Add(Point point) {
 	data.emplace_back(point);
 }
 
-Matrix Dataset::toDesignMatrix(int bases) {
+Matrix Dataset::ToDesignMatrix(int bases) {
 	Matrix matrix_data = Matrix(this->data.size(), bases);
 
 	for (int i = 0; i < matrix_data.getRows(); ++i) {
@@ -36,7 +36,7 @@ Matrix Dataset::toDesignMatrix(int bases) {
 	return matrix_data;
 }
 
-Matrix Dataset::labels() {
+Matrix Dataset::GetLabels() {
 	Matrix y = Matrix(this->data.size(), 1);
 
 	for (int i = 0; i < y.getRows(); ++i) {

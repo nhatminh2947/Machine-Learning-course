@@ -37,15 +37,15 @@ int main(int argc, char *argv[]) {
 			char c;
 			std::istringstream iss(line);
 			iss >> x >> c >> y;
-			dataset.add(Point(x, y));
+            dataset.Add(Point(x, y));
 		}
 		input_file.close();
 	} else {
 		std::cout << "File is closed" << std::endl;
 	}
 
-	Matrix X = dataset.toDesignMatrix(bases);
-	Matrix y = dataset.labels();
+	Matrix X = dataset.ToDesignMatrix(bases);
+	Matrix y = dataset.GetLabels();
 
 	IdentityMatrix I = IdentityMatrix(X.getRows());
 

@@ -17,6 +17,7 @@ private:
 
 public:
     GaussianDataGenerator(double mean, double var);
+    GaussianDataGenerator() = default;
     double generate();
 };
 
