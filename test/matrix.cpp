@@ -245,7 +245,7 @@ TEST(MatrixOperatorTestSuit, MatrixOperatorTestSuit_inverse_Test) {
 
 TEST(MatrixOperatorTestSuit, MatrixOperatorTestSuit_Row_Test) {
     Matrix a = Matrix(3, 3);
-    Row b(3);
+    Col b(3);
 
     a(0, 0) = 1;
     a(0, 1) = 1;

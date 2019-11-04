@@ -8,6 +8,44 @@
 #include <iostream>
 
 template<typename Type = double>
+class Matrix;
+
+template<typename T = int>
+class Col {
+private:
+    Matrix<T> matrix;
+public:
+    explicit Col(int n);
+
+    template<typename Type>
+    explicit Col(Col<Type> r);
+
+    Col<T>() = default;
+
+    T &operator()(int i);
+
+    T &operator()(int i) const;
+
+    Col<T> operator-(Col<T> const &b);
+
+    Col<T> operator*(double const &x);
+
+    Col<T> &operator=(Col<T> const &b);
+
+    Col<T> &operator=(Matrix<T> const &b);
+
+    template<typename U>
+    friend std::ostream &operator<<(std::ostream &out, const Col<U> &matrix);
+
+    template<typename U>
+    friend std::ostream &operator<<(std::ostream &out, Col<U> &matrix);
+
+    int getRows() const;
+
+    int size();
+};
+
+template<typename Type>
 class Matrix {
 private:
     int n_{}, m_{};
@@ -26,29 +64,30 @@ public:
 
     Matrix<Type> operator+(Matrix<Type> const &b);
 
-    Matrix<Type> operator*(Matrix<Type> const &b);
-
     Matrix<Type> operator-(Matrix<Type> const &b);
+
+    Matrix<Type> operator*(Matrix<Type> const &b);
 
     Matrix<Type> operator*(double const &lambda);
 
     Matrix<Type> operator/(double const &b);
 
+    Matrix<Type> &operator=(Matrix<Type> const &b);
+
     template<typename T>
     friend bool operator==(Matrix<T> const &a, Matrix<T> const &b);
 
-    template<typename T>
-    friend Matrix<Type> operator*(double const &lambda, Matrix<T> const &b);
+    Col<Type> operator()(int i);
 
     Type &operator()(int i, int j);
 
     Type &operator()(int i, int j) const;
 
     template<typename T>
-    friend std::ostream &operator<<(std::ostream &out, const Matrix<T> &matrix);
+    friend std::ostream &operator<<(std::ostream &out, const Matrix<Type> &matrix);
 
     template<typename T>
-    friend std::ostream &operator<<(std::ostream &out, Matrix<T> &matrix);
+    friend std::ostream &operator<<(std::ostream &out, Matrix<Type> &matrix);
 
     std::pair<Matrix<Type>, Matrix<Type>> LUDecomposition();
 
@@ -58,44 +97,40 @@ public:
 
     int getCols() const;
 
-    Matrix<Type> eye(int n);
-};
-
-template<typename T = int>
-class Row : public Matrix<T> {
-public:
-    explicit Row(int n);
-
-    T &operator()(int i);
-
-    T &operator()(int i) const;
-
-    int size();
+    static Matrix<Type> eye(int n);
 };
 
 template<typename T>
-T &Row<T>::operator()(int i) {
-    return Matrix<T>::operator()(i, 0);
+T &Col<T>::operator()(int i) {
+    return matrix(i, 0);
 }
 
 template<typename T>
-T &Row<T>::operator()(int i) const {
-    return Matrix<T>::operator()(i, 0);
+T &Col<T>::operator()(int i) const {
+    return matrix(i, 0);
 }
 
 template<typename T>
-Row<T>::Row(int n) : Matrix<T>(n, 1) {
+Col<T>::Col(int n) : matrix(n, 1) {
 
 }
 
 template<typename T>
-int Row<T>::size() {
-    return this->getRows();
+int Col<T>::size() {
+    return matrix.getRows();
 }
 
-
+template<typename T>
 template<typename Type>
-std::ostream &operator<<(std::ostream &out, const Matrix<Type> &matrix) {
+Col<T>::Col(Col<Type> r) : matrix(r.getRows(), 1) {
+    for (int i = 0; i < r.getRows(); ++i) {
+        this->operator()(i) = T(r(i));
+    }
+}
+
+
+template<typename T>
+std::ostream &operator<<(std::ostream &out, const Matrix<T> &matrix) {
     for (int i = 0; i < matrix.n_; ++i) {
         for (int j = 0; j < matrix.m_; ++j) {
             out << matrix(i, j) << " ";
@@ -137,7 +172,7 @@ Matrix<Type> Matrix<Type>::operator+(const Matrix<Type> &b) {
 template<typename Type>
 Type &Matrix<Type>::operator()(int i, int j) {
     if (i >= n_) {
-        throw std::out_of_range("Row index is out of range");
+        throw std::out_of_range("Col index is out of range");
     }
 
     if (j >= m_) {
@@ -150,7 +185,7 @@ Type &Matrix<Type>::operator()(int i, int j) {
 template<typename Type>
 Type &Matrix<Type>::operator()(int i, int j) const {
     if (i >= n_) {
-        throw std::out_of_range("Row index is out of range");
+        throw std::out_of_range("Col index is out of range");
     }
 
     if (j >= m_) {
@@ -225,8 +260,8 @@ Matrix<Type> Matrix<Type>::operator*(double const &lambda) {
     return result;
 }
 
-template<typename Type>
-std::ostream &operator<<(std::ostream &out, Matrix<Type> &matrix) {
+template<typename T>
+std::ostream &operator<<(std::ostream &out, Matrix<T> &matrix) {
     for (int i = 0; i < matrix.getRows(); ++i) {
         for (int j = 0; j < matrix.getCols(); ++j) {
             out << matrix(i, j) << " ";
@@ -237,9 +272,9 @@ std::ostream &operator<<(std::ostream &out, Matrix<Type> &matrix) {
     return out;
 }
 
-template<typename Type>
-Matrix<Type> operator*(double const &lambda, const Matrix<Type> &b) {
-    Matrix<Type> result(b.getRows(), b.getCols());
+template<typename T>
+Matrix<double> operator*(double const &lambda, const Matrix<T> &b) {
+    Matrix<double> result(b.getRows(), b.getCols());
 
     for (int i = 0; i < b.getRows(); ++i) {
         for (int j = 0; j < b.getCols(); ++j) {
@@ -249,6 +284,31 @@ Matrix<Type> operator*(double const &lambda, const Matrix<Type> &b) {
 
     return result;
 }
+
+template<typename T>
+Col<double> operator*(double const &lambda, const Col<T> &b) {
+    Col<double> result(b.getRows());
+
+    for (int i = 0; i < b.getRows(); ++i) {
+        result(i) = lambda * b(i);
+    }
+
+    return result;
+}
+
+template<typename U>
+Col<U> operator*(Matrix<U> const &a, Col<U> const &b) {
+    Col<U> result(a.getRows());
+
+    for (int i = 0; i < a.getRows(); ++i) {
+        for (int k = 0; k < b.getRows(); ++k) {
+            result(i) += a(i, k) * b(k);
+        }
+    }
+
+    return result;
+}
+
 
 template<typename Type>
 bool operator==(const Matrix<Type> &a, const Matrix<Type> &b) {
@@ -301,12 +361,15 @@ Matrix<Type> Matrix<Type>::inverse() {
 
 template<typename Type>
 Matrix<Type> Matrix<Type>::eye(int n) {
-    for (int i = 0; i < n_; ++i) {
-        for (int j = 0; j < m_; ++j) {
-            if (i == j) this->operator()(i, j) = 1;
-            else this->operator()(i, j) = 0;
+    Matrix<Type> result(n);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (i == j) result(i, j) = 1;
+            else result(i, j) = 0;
         }
     }
+
+    return result;
 }
 
 template<typename Type>
@@ -321,6 +384,21 @@ Matrix<Type> Matrix<Type>::operator-(const Matrix<Type> &b) {
         for (int j = 0; j < this->getCols(); ++j) {
             result(i, j) = this->operator()(i, j) - b(i, j);
         }
+    }
+
+    return result;
+}
+
+template<typename Type>
+Col<Type> Col<Type>::operator-(const Col<Type> &b) {
+    if (this->getRows() != b.getRows()) {
+        throw std::invalid_argument("Matrix size must be equal");
+    }
+
+    Col<Type> result = Col<Type>(this->getRows());
+
+    for (int i = 0; i < this->getRows(); ++i) {
+        result(i) = this->operator()(i) - b(i);
     }
 
     return result;
@@ -387,6 +465,66 @@ Matrix<Type>::Matrix(int n) {
             data[i][j] = 0;
         }
     }
+}
+
+template<typename Type>
+Matrix<Type> &Matrix<Type>::operator=(Matrix<Type> const &b) {
+    for (int i = 0; i < this->getRows(); ++i) {
+        for (int j = 0; j < this->getCols(); ++j) {
+            this->operator()(i, j) = b(i, j);
+        }
+    }
+}
+
+template<typename Type>
+Col<Type> Matrix<Type>::operator()(int i) {
+    Col<Type> col(getCols());
+    for (int j = 0; j < this->getCols(); ++j) {
+        col(j) = this->operator()(i, j);
+    }
+
+    return col;
+}
+
+
+template<typename Type>
+Col<Type> &Col<Type>::operator=(Col<Type> const &b) {
+    for (int i = 0; i < this->getRows(); ++i) {
+        this->operator()(i) = b(i);
+    }
+}
+
+template<typename Type>
+Col<Type> &Col<Type>::operator=(Matrix<Type> const &b) {
+    for (int i = 0; i < this->getRows(); ++i) {
+        this->operator()(i) = b(i, 0);
+    }
+}
+
+template<typename T>
+int Col<T>::getRows() const {
+    return matrix.getRows();
+}
+
+template<typename T>
+Col<T> Col<T>::operator*(double const &x) {
+    Col<T> result(matrix.getRows());
+
+    for (int i = 0; i < matrix.getRows(); ++i) {
+        result(i) = x * this->operator()(i);
+    }
+
+    return result;
+}
+
+template<typename T>
+std::ostream &operator<<(std::ostream &out, const Col<T> &col) {
+    out << col.matrix;
+}
+
+template<typename T>
+std::ostream &operator<<(std::ostream &out, Col<T> &col) {
+    out << col.matrix;
 }
 
 

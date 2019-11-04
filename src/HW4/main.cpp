@@ -5,8 +5,10 @@
 #include <GaussianDataGenerator.h>
 #include <iostream>
 #include <Dataset.h>
+#include <ConfusionMatrix.h>
+#include "LogisticRegression.h"
 
-void GenerateData(double n, double mx[], double vx[], double my[], double vy[], Matrix<double> &X, Row<int> &y) {
+void GenerateData(double n, double mx[], double vx[], double my[], double vy[], Matrix<double> &X, Col<int> &y) {
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0, 1);
 
@@ -54,11 +56,16 @@ int main(int argc, const char *argv[]) {
     }
 
     Matrix<double> X(2 * n, 3);
-    Row<int> y(2 * n);
+    Col<int> y_true(2 * n);
 
-    GenerateData(n, mx, vx, my, vy, X, y);
+    GenerateData(n, mx, vx, my, vy, X, y_true);
 
-    std::cout << X << std::endl;
+    LogisticRegression<double> logistic_regression(X, y_true, 0.01, 100);
+    Col<int> y_pred = logistic_regression.Classify(X);
+
+    ConfusionMatrix cm(y_true, y_pred, 2);
+
+    std::cout << cm << std::endl;
 
     return 0;
 }

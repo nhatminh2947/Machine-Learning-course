@@ -14,7 +14,7 @@ private:
     Matrix<int> matrix_;
     int n_classes_;
 public:
-    ConfusionMatrix(Row<int> y_true, Row<int> y_pred, int n_classes);
+    ConfusionMatrix(Col<int> y_true, Col<int> y_pred, int n_classes);
 
     friend std::ostream &operator<<(std::ostream &out, const ConfusionMatrix &matrix);
 

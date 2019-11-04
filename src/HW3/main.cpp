@@ -35,7 +35,7 @@ void hw11(double mean, double var) {
 }
 
 void hw12(int n, double a) {
-    Matrix W(n, 1);
+    Matrix<double> W(n, 1);
 
     for (int i = 0; i < n; ++i) {
         std::cin >> W(i, 0);

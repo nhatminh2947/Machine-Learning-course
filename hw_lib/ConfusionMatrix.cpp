@@ -5,7 +5,7 @@
 #include "ConfusionMatrix.h"
 
 std::ostream &operator<<(std::ostream &out, const ConfusionMatrix &confusion_matrix) {
-    out << "Confusion Matrix:";
+    out << "Confusion Matrix:" << std::endl;
     out << "            ";
     for (int k = 0; k < confusion_matrix.n_classes_; ++k) {
         out << " Predict cluster " << k;
@@ -40,7 +40,7 @@ std::ostream &operator<<(std::ostream &out, ConfusionMatrix &confusion_matrix) {
     return out;
 }
 
-ConfusionMatrix::ConfusionMatrix(Row<int> y_true, Row<int> y_pred, int n_classes) : matrix_(n_classes) {
+ConfusionMatrix::ConfusionMatrix(Col<int> y_true, Col<int> y_pred, int n_classes) : matrix_(n_classes) {
     n_classes_ = n_classes;
     for (int i = 0; i < y_true.size(); ++i) {
         matrix_(y_true(i), y_pred(i))++;
