@@ -13,12 +13,12 @@
 class PolynomialDataGenerator {
 private:
     int _n;
-    Matrix _W{};
+    Matrix<double> _W;
     std::uniform_real_distribution<double> distribution;
     GaussianDataGenerator _gdg = GaussianDataGenerator(0, 0);
 
 public:
-    PolynomialDataGenerator(int n, double a, Matrix W);
+    PolynomialDataGenerator(int n, double a, Matrix<double> W);
 
     double generate();
 

@@ -17,7 +17,7 @@ private:
 	static int reverse(int i);
 
 public:
-    static std::vector<Matrix> ReadImages(const std::string &path);
+    static std::vector<Matrix<double>> ReadImages(const std::string &path);
 
 	static std::vector<int> ReadLabels(const std::string &path);
 };

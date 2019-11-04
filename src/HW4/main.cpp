@@ -6,7 +6,7 @@
 #include <iostream>
 #include <Dataset.h>
 
-Dataset<2> GenerateData(double n, double mx[], double vx[], double my[], double vy[]) {
+void GenerateData(double n, double mx[], double vx[], double my[], double vy[], Matrix<double> &X, Row<int> &y) {
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0, 1);
 
@@ -19,8 +19,6 @@ Dataset<2> GenerateData(double n, double mx[], double vx[], double my[], double 
         dy[i] = GaussianDataGenerator(my[i], vy[i]);
     }
 
-    Dataset<2> dataset;
-
     for (int i = 0; i < 2 * n; ++i) {
         int id = distribution(generator);
 
@@ -28,12 +26,13 @@ Dataset<2> GenerateData(double n, double mx[], double vx[], double my[], double 
             id = 1 - id;
         }
 
-        dataset.Add(Point<double, 2>(dx[id].generate(), dy[id].generate()), double(id));
+        X(i, 1) = dx[id].generate();
+        X(i, 2) = dy[id].generate();
+
+        y(i) = (double) id;
 
         count[id]++;
     }
-
-    return dataset;
 }
 
 int main(int argc, const char *argv[]) {
@@ -54,9 +53,12 @@ int main(int argc, const char *argv[]) {
         std::cin >> vy[i];
     }
 
-    Dataset<2> dataset = GenerateData(n, mx, vx, my, vy);
+    Matrix<double> X(2 * n, 3);
+    Row<int> y(2 * n);
 
-    std::cout << dataset.size() << std::endl;
+    GenerateData(n, mx, vx, my, vy, X, y);
+
+    std::cout << X << std::endl;
 
     return 0;
 }
