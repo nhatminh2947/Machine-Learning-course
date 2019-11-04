@@ -78,4 +78,13 @@ public:
     explicit SquareMatrix(int n);
 };
 
+class Row : public Matrix {
+public:
+    explicit Row(int n);
+
+    double &operator()(int i);
+
+    double &operator()(int i) const;
+};
+
 #endif //HOMEWORK_MATRIX_H

@@ -242,3 +242,27 @@ TEST(MatrixOperatorTestSuit, MatrixOperatorTestSuit_inverse_Test) {
 	std::cout << c << std::endl;
 	EXPECT_TRUE(c == IdentityMatrix(3));
 }
+
+TEST(MatrixOperatorTestSuit, MatrixOperatorTestSuit_Row_Test) {
+    Matrix a = Matrix(3, 3);
+    Row b(3);
+
+    a(0, 0) = 1;
+    a(0, 1) = 1;
+    a(0, 2) = 1;
+    a(1, 0) = 1;
+    a(1, 1) = 1;
+    a(1, 2) = 1;
+    a(2, 0) = 1;
+    a(2, 1) = 1;
+    a(2, 2) = 1;
+
+    b(0, 0) = 1;
+    b(1, 0) = 2;
+    b(2, 0) = 3;
+
+    Matrix c = a * b;
+
+    std::cout << c << std::endl;
+    EXPECT_TRUE(c == IdentityMatrix(3));
+}

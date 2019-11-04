@@ -41,37 +41,38 @@ add_subdirectory(hw_lib)
 add_executable(HW1_LSE src/HW1/LSE.cpp)
 add_executable(HW1_Newton src/HW1/Newton.cpp)
 
-target_link_libraries(HW1_LSE Matrix_lib)
-target_link_libraries(HW1_Newton Matrix_lib)
+target_link_libraries(HW1_LSE MatrixLib)
+target_link_libraries(HW1_Newton MatrixLib)
 
 #==============================Homework 2==============================
 add_executable(hw2 src/HW2/main.cpp src/HW2/OnlineLearning.cpp src/HW2/MultinomialNaiveBayes.cpp src/HW2/GaussianNaiveBayes.cpp
         src/HW2/NaiveBayes.cpp)
 
-target_link_libraries(hw2 Matrix_lib)
+target_link_libraries(hw2 MatrixLib)
 
 #==============================Homework 3==============================
 add_executable(rdg src/HW3/main.cpp)
 add_executable(seq src/HW3/SequentialEstimator.cpp)
 add_executable(blr src/HW3/BayesianLinearRegression.cpp)
 
-target_link_libraries(rdg Matrix_lib)
-target_link_libraries(seq Matrix_lib)
-target_link_libraries(blr Matrix_lib)
+target_link_libraries(rdg MatrixLib)
+target_link_libraries(seq MatrixLib)
+target_link_libraries(blr MatrixLib)
 
-target_link_libraries(rdg Random_lib)
-target_link_libraries(seq Random_lib)
-target_link_libraries(blr Random_lib)
+target_link_libraries(rdg RandomLib)
+target_link_libraries(seq RandomLib)
+target_link_libraries(blr RandomLib)
 
 #==============================Homework 4==============================
 add_executable(logistic_regression src/HW4/LogisticRegression.cpp src/HW4/main.cpp)
 
-target_link_libraries(logistic_regression Matrix_lib)
-target_link_libraries(logistic_regression Random_lib)
+target_link_libraries(logistic_regression MatrixLib)
+target_link_libraries(logistic_regression RandomLib)
+target_link_libraries(logistic_regression MetricLib)
 
 #TESTING
 
 add_executable(HW1_test test/matrix.cpp)
-target_link_libraries(HW1_test Matrix_lib)
+target_link_libraries(HW1_test MatrixLib)
 target_link_libraries(HW1_test gtest gtest_main)
 add_test(HW1_test COMMAND HW1)

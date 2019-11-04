@@ -344,3 +344,15 @@ Matrix Matrix::ToDesignMatrix(double x, int basis) {
 SquareMatrix::SquareMatrix(int n) : Matrix(n) {
 
 }
+
+Row::Row(int n) : Matrix(n, 1) {
+
+}
+
+double &Row::operator()(int i) {
+    return Matrix::operator()(i, 0);
+}
+
+double &Row::operator()(int i) const {
+    return Matrix::operator()(i, 0);
+}

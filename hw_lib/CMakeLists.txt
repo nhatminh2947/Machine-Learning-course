@@ -11,7 +11,7 @@ set(SOURCE_FILES
         Dataset.cpp
         IdxFileReader.cpp)
 
-add_library(Matrix_lib STATIC ${SOURCE_FILES} ${HEADER_FILES})
+add_library(MatrixLib STATIC ${SOURCE_FILES} ${HEADER_FILES})
 
 set(RANDOM_HEADER_FILES
         GaussianDataGenerator.h
@@ -22,4 +22,13 @@ set(RANDOM_SOURCE_FILES
         GaussianDataGenerator.cpp
         PolynomialDataGenerator.cpp)
 
-add_library(Random_lib STATIC ${RANDOM_SOURCE_FILES} ${RANDOM_HEADER_FILES})
+add_library(RandomLib STATIC ${RANDOM_SOURCE_FILES} ${RANDOM_HEADER_FILES})
+
+set(METRIC_HEADER_FILES
+        ConfusionMatrix.h
+        )
+
+set(METRIC_SOURCE_FILES
+        ConfusionMatrix.cpp)
+
+add_library(MetricLib STATIC ${METRIC_SOURCE_FILES} ${METRIC_HEADER_FILES})

@@ -6,14 +6,31 @@
 #include <iostream>
 #include <Dataset.h>
 
-Dataset GenerateData(double n, double mx, double vx, double my, double vy) {
-    GaussianDataGenerator dx(mx, vx);
-    GaussianDataGenerator dy(my, vy);
+Dataset<2> GenerateData(double n, double mx[], double vx[], double my[], double vy[]) {
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(0, 1);
 
-    Dataset dataset;
+    GaussianDataGenerator dx[2];
+    GaussianDataGenerator dy[2];
+    int count[2];
+    for (int i = 0; i < 2; ++i) {
+        count[i] = 0;
+        dx[i] = GaussianDataGenerator(mx[i], vx[i]);
+        dy[i] = GaussianDataGenerator(my[i], vy[i]);
+    }
 
-    for (int i = 0; i < n; ++i) {
-        dataset.Add(Point(dx.generate(), dy.generate()));
+    Dataset<2> dataset;
+
+    for (int i = 0; i < 2 * n; ++i) {
+        int id = distribution(generator);
+
+        if (count[id] == n) {
+            id = 1 - id;
+        }
+
+        dataset.Add(Point<double, 2>(dx[id].generate(), dy[id].generate()), double(id));
+
+        count[id]++;
     }
 
     return dataset;
@@ -21,25 +38,25 @@ Dataset GenerateData(double n, double mx, double vx, double my, double vy) {
 
 int main(int argc, const char *argv[]) {
     int n;
-    Dataset d[2];
 
     std::cout << "Number of data points: ";
     std::cin >> n;
-    for (int i = 0; i < 2; ++i) {
-        double mx, vx, my, vy;
-        std::cout << "mean x" << i << ": ";
-        std::cin >> mx;
-        std::cout << "variance x" << i << ": ";
-        std::cin >> vx;
-        std::cout << "mean y" << i << ": ";
-        std::cin >> my;
-        std::cout << "variance y" << i << ": ";
-        std::cin >> vy;
+    double mx[2], vx[2], my[2], vy[2];
 
-        d[i] = GenerateData(n, mx, vx, my, vy);
+    for (int i = 0; i < 2; ++i) {
+        std::cout << "mean x" << i + 1 << ": ";
+        std::cin >> mx[i];
+        std::cout << "variance x" << i + 1 << ": ";
+        std::cin >> vx[i];
+        std::cout << "mean y" << i + 1 << ": ";
+        std::cin >> my[i];
+        std::cout << "variance y" << i + 1 << ": ";
+        std::cin >> vy[i];
     }
 
+    Dataset<2> dataset = GenerateData(n, mx, vx, my, vy);
 
+    std::cout << dataset.size() << std::endl;
 
     return 0;
 }

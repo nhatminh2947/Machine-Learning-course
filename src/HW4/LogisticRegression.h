@@ -6,9 +6,22 @@
 #define HOMEWORK_LOGISTICREGRESSION_H
 
 
-class LogisticRegression {
+#include <Dataset.h>
 
+template <typename GradType>
+class LogisticRegression {
+private:
+    friend double sigmoid(double x);
+
+public:
+    explicit LogisticRegression(Matrix X, std::array<int> y);
+    void NewtonMethod();
+    void GradientDescent();
 };
 
+template <typename GradType>
+LogisticRegression<GradType>::LogisticRegression(Dataset<n_dimensions> d) {
+
+}
 
 #endif //HOMEWORK_LOGISTICREGRESSION_H
