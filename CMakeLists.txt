@@ -66,9 +66,9 @@ target_link_libraries(blr RandomLib)
 #==============================Homework 4==============================
 add_executable(logistic_regression src/HW4/LogisticRegression.cpp src/HW4/main.cpp)
 
-target_link_libraries(logistic_regression MatrixLib)
-target_link_libraries(logistic_regression RandomLib)
 target_link_libraries(logistic_regression MetricLib)
+target_link_libraries(logistic_regression RandomLib)
+target_link_libraries(logistic_regression MatrixLib)
 
 #TESTING
 

@@ -23,16 +23,16 @@ std::ostream &operator<<(std::ostream &out, const ConfusionMatrix &confusion_mat
 }
 
 std::ostream &operator<<(std::ostream &out, ConfusionMatrix &confusion_matrix) {
-    out << "Confusion Matrix:";
+    out << "Confusion Matrix:" << std::endl;
     out << "            ";
     for (int k = 0; k < confusion_matrix.n_classes_; ++k) {
-        out << " Predict cluster " << k;
+        out << " Predict cluster " << k << "\t";
     }
     out << std::endl;
     for (int i = 0; i < confusion_matrix.n_classes_; ++i) {
         out << "Is cluster " << i;
         for (int j = 0; j < confusion_matrix.n_classes_; ++j) {
-            out << "\t\t" << confusion_matrix.matrix_(i, j) << "\t\t";
+            out << "\t\t" << confusion_matrix.matrix_(i, j);
         }
         out << std::endl;
     }
