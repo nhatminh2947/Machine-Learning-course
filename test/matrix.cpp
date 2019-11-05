@@ -210,5 +210,5 @@ TEST(MatrixOperatorTestSuit, MatrixOperatorTestSuit_inverse_Test) {
 
     Matrix<double> c = a * b;
     std::cout << c << std::endl;
-//    EXPECT_TRUE(c == IdentityMatrix(3));
+    EXPECT_TRUE(c == Matrix<double>(3, 3, fill::eye));
 }

@@ -16,14 +16,26 @@ public:
     template<typename fill_type>
     Col(int n, const fill::fill_class<fill_type> &f);
 
-    Col(Matrix<Type> matrix);
+    explicit Col(Matrix<Type> matrix);
 
-    template<typename T>
-    friend Matrix<double> operator*(Matrix<double> a, Col<T> b);
+    template<typename V>
+    explicit Col(Col<V> const &col);
+
+    friend Matrix<double> operator*(Matrix<double> a, Col<Type> b) {
+        Matrix<double> result(a.getRows(), 1);
+
+        for (int i = 0; i < a.getRows(); ++i) {
+            for (int k = 0; k < a.getRows(); ++k) {
+                result(i, 0) += a(i, k) * b[k];
+            }
+        }
+
+        return result;
+    }
 
     Col &operator=(Matrix<Type> const &b);
 
-    int size();
+    int size() const;
 };
 
 //template<typename Type>
@@ -63,7 +75,7 @@ Col<Type>::Col(int n):Matrix<Type>(n, 1) {
 
 
 template<typename T>
-int Col<T>::size() {
+int Col<T>::size() const {
     return this->getRows();
 }
 
@@ -84,17 +96,12 @@ Col<Type>::Col(int n, const fill::fill_class<fill_type> &f):Matrix<Type>(n, 1, f
 
 }
 
-template<typename T>
-Matrix<double> operator*(Matrix<double> a, Col<T> b) {
-    Matrix<double> result(a.getRows(), 1);
-
-    for (int i = 0; i < a.getRows(); ++i) {
-        for (int k = 0; k < a.getRows(); ++k) {
-            result(i, 0) += a(i, k) * b[k];
-        }
+template<typename Type>
+template<typename V>
+Col<Type>::Col(const Col<V> &col) : Matrix<Type>(col.size(), 1) {
+    for (int i = 0; i < col.size(); ++i) {
+        this->operator[](i) = Type(col[i]);
     }
-
-    return result;
 }
 
 #endif //HOMEWORK_COL_H

@@ -21,11 +21,13 @@ private:
         return 1.0 / (1.0 + exp(-x));
     }
 
-    static Col<double> sigmoid(Col<double> x) {
-        Col<double> sigmoid_x(x.size());
+    static Matrix<double> sigmoid(Matrix<double> x) {
+        Matrix<double> sigmoid_x(x.getRows(), x.getCols());
 
-        for (int i = 0; i < x.size(); ++i) {
-            sigmoid_x[i] = sigmoid(x[i]);
+        for (int i = 0; i < sigmoid_x.getRows(); ++i) {
+            for (int j = 0; j < sigmoid_x.getCols(); ++j) {
+                sigmoid_x(i, j) = sigmoid(x(i, j));
+            }
         }
 
         return sigmoid_x;
@@ -45,11 +47,11 @@ private:
 
     }
 
-    void Train(Matrix<double> X, Col<int> y) {
+    void Train(Matrix<double> X, Col<double> y) {
         NewtonMethod(X, y);
     }
 
-    void GradientDescent(Matrix<double> X, Col<int> y) {
+    void GradientDescent(Matrix<double> X, Col<double> y) {
         for (int i = 0; i < max_iter_; ++i) {
             for (int j = 0; j < X.getRows(); ++j) {
                 Col<double> z = weights_.T() * Col<double>(X.row(j).T());
@@ -65,19 +67,19 @@ private:
         std::cout << weights_ << std::endl;
     }
 
-    void NewtonMethod(Matrix<double> X, Col<int> y) {
+    void NewtonMethod(Matrix<double> X, Col<double> y) {
         for (int i = 0; i < max_iter_; ++i) {
-            Matrix<double> H = X.T() * X;
+            Matrix<double> H = X.T() * weights_ * X;
             std::cout << "H" << std::endl;
             std::cout << H << std::endl;
             std::cout << "H.inverse()" << std::endl;
             std::cout << H.inverse() << std::endl;
-            Matrix<double> gradient = X.T() * X * weights_ - X.T() * y;
+            Matrix<double> gradient = X.T() * X * (X.T() * (y - sigmoid(X.T() * y)));
             std::cout << "gradient" << std::endl;
             std::cout << gradient << std::endl;
             std::cout << "H.inverse() * gradient" << std::endl;
             std::cout << H.inverse() * gradient << std::endl;
-            weights_ = weights_ - H.inverse() * gradient;
+            weights_ = weights_ + H.inverse() * gradient;
         }
 
         std::cout << "Training Completed" << std::endl;
@@ -85,7 +87,7 @@ private:
     }
 
 public:
-    explicit LogisticRegression(const Matrix<double> &X, const Col<int> &y, double learning_rate, int max_iter)
+    explicit LogisticRegression(const Matrix<double> &X, const Col<double> &y, double learning_rate, int max_iter)
             : weights_(X.getCols(), fill::rand),
               learning_rate_(learning_rate),
               max_iter_(max_iter) {

@@ -88,6 +88,8 @@ public:
 
     Type &operator[](int i);
 
+    Type &operator[](int i) const;
+
     Type &operator()(int i, int j);
 
     Type &operator()(int i, int j) const;
@@ -198,8 +200,8 @@ Matrix<Type> Matrix<Type>::T() {
 
 template<typename Type>
 std::pair<Matrix<Type>, Matrix<Type>> Matrix<Type>::LUDecomposition() {
-    Matrix<Type> L(n_);
-    Matrix<Type> U(n_);
+    Matrix<Type> L(n_, n_, fill::zeros);
+    Matrix<Type> U(n_, n_, fill::zeros);
 
     for (int i = 0; i < n_; ++i) {
         for (int j = 0; j < n_; ++j) {
@@ -339,8 +341,8 @@ Matrix<Type> Matrix<Type>::inverse() {
         }
     }
 
-    std::cout << inverse_L << std::endl;
-    std::cout << inverse_matrix << std::endl;
+    DEBUG(inverse_L);
+    DEBUG(inverse_matrix);
 
     return inverse_matrix;
 }
@@ -432,6 +434,11 @@ Type &Matrix<Type>::operator[](int i) {
 }
 
 template<typename Type>
+Type &Matrix<Type>::operator[](int i) const {
+    return this->operator()(i / this->getCols(), i % this->getCols());
+}
+
+template<typename Type>
 Matrix<Type> Matrix<Type>::row(int const i) {
     Matrix<Type> row(1, this->getCols());
 
@@ -476,7 +483,7 @@ const Matrix<Type> &Matrix<Type>::ones() {
 template<typename Type>
 const Matrix<Type> &Matrix<Type>::random() {
     std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(0.0, 1.0);
+    std::normal_distribution<double> distribution(0.0, 100.0);
 
     for (int i = 0; i < n_; ++i) {
         for (int j = 0; j < m_; ++j) {
