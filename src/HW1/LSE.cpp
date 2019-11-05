@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <limits>
 #include "matrix.h"
-#include "Dataset.h"
+#include "Point.h"
 
 int main(int argc, char *argv[]) {
 	double lambda = 0;

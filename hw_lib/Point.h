@@ -2,8 +2,8 @@
 // Created by nhatminh2947 on 9/24/19.
 //
 
-#ifndef HOMEWORK_DATASET_H
-#define HOMEWORK_DATASET_H
+#ifndef HOMEWORK_POINT_H
+#define HOMEWORK_POINT_H
 
 #include <iostream>
 #include <vector>
@@ -67,6 +67,16 @@ public:
         elements_[1] = y;
         elements_[2] = z;
     }
+
+//    Col<T> ToCol() {
+//        Col<T> col(elements_.size());
+//
+//        for (int i = 0; i < col.size(); ++i) {
+//            col(i) = elements_.at(i);
+//        }
+//
+//        return col;
+//    }
 };
 
-#endif //HOMEWORK_DATASET_H
+#endif //HOMEWORK_POINT_H

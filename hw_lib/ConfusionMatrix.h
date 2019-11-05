@@ -8,6 +8,7 @@
 
 #include <vector>
 #include "matrix.h"
+#include "Col.h"
 
 class ConfusionMatrix {
 private:
@@ -15,6 +16,10 @@ private:
     int n_classes_;
 public:
     ConfusionMatrix(Col<int> y_true, Col<int> y_pred, int n_classes);
+
+    double sensitivity();
+
+    double specificity();
 
     friend std::ostream &operator<<(std::ostream &out, const ConfusionMatrix &matrix);
 

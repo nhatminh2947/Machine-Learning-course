@@ -2,14 +2,16 @@ project(Homework)
 
 set(HEADER_FILES
         matrix.h
-        Dataset.h
+        Point.h
         IdxFileReader.h
+        Col.h
         )
 
 set(SOURCE_FILES
         matrix.cpp
-        Dataset.cpp
-        IdxFileReader.cpp)
+        Point.cpp
+        IdxFileReader.cpp
+        Col.cpp)
 
 add_library(MatrixLib STATIC ${SOURCE_FILES} ${HEADER_FILES})
 

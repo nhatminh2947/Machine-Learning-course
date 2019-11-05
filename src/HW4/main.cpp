@@ -4,8 +4,9 @@
 
 #include <GaussianDataGenerator.h>
 #include <iostream>
-#include <Dataset.h>
+#include <Point.h>
 #include <ConfusionMatrix.h>
+#include <iomanip>
 #include "LogisticRegression.h"
 
 void GenerateData(double n, double mx[], double vx[], double my[], double vy[], Matrix<double> &X, Col<int> &y) {
@@ -28,10 +29,11 @@ void GenerateData(double n, double mx[], double vx[], double my[], double vy[], 
             id = 1 - id;
         }
 
+        X(i, 0) = 1;
         X(i, 1) = dx[id].generate();
         X(i, 2) = dy[id].generate();
 
-        y(i) = (double) id;
+        y[i] = (double) id;
 
         count[id]++;
     }
@@ -60,12 +62,17 @@ int main(int argc, const char *argv[]) {
 
     GenerateData(n, mx, vx, my, vy, X, y_true);
 
-    LogisticRegression<double> logistic_regression(X, y_true, 0.01, 100);
+    LogisticRegression<double> logistic_regression(X, y_true, 0.001, 100);
     Col<int> y_pred = logistic_regression.Classify(X);
 
     ConfusionMatrix cm(y_true, y_pred, 2);
 
     std::cout << cm << std::endl;
+
+    std::cout << "Sensitivity (Successfully predict cluster 1): " << std::setprecision(5) << std::fixed
+              << cm.sensitivity() << std::endl;
+    std::cout << "Specificity (Successfully predict cluster 2): " << std::setprecision(5) << std::fixed
+              << cm.specificity() << std::endl;
 
     return 0;
 }

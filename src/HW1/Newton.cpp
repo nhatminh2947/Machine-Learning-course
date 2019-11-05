@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <limits>
 #include "matrix.h"
-#include "Dataset.h"
+#include "Point.h"
 
 Matrix first_order_f(Matrix X, Matrix Y, Matrix W) {
 	return W.T() * X.T() * X - Y.T() * X;
