@@ -80,6 +80,11 @@ public:
 
     Matrix row(int i);
 
+    double CalculateDeterminant();
+
+    template<typename T>
+    friend Matrix<double> exp(Matrix<T> matrix);
+
     template<typename fill_type>
     Matrix &fill(const fill::fill_class<fill_type> &f);
 
@@ -137,7 +142,7 @@ Matrix<Type> Matrix<Type>::operator*(const Matrix<Type> &b) {
 
     for (int i = 0; i < this->getRows(); ++i) {
         for (int j = 0; j < b.getCols(); ++j) {
-            for (int k = 0; k < m_; ++k) {
+            for (int k = 0; k < this->getCols(); ++k) {
                 result.data[i][j] += this->data[i][k] * b(k, j);
             }
         }
@@ -210,8 +215,6 @@ std::pair<Matrix<Type>, Matrix<Type>> Matrix<Type>::LUDecomposition() {
                 for (int k = 0; k < i; ++k) {
                     sum += U(k, j) * L(i, k);
                 }
-                DEBUG(this->data[i][j]);
-                DEBUG(sum);
                 U.data[i][j] = this->data[i][j] - sum;
             }
 
@@ -225,9 +228,6 @@ std::pair<Matrix<Type>, Matrix<Type>> Matrix<Type>::LUDecomposition() {
             }
         }
     }
-
-    DEBUG(L);
-    DEBUG(U);
 
     return std::make_pair(L, U);
 }
@@ -302,20 +302,12 @@ Matrix<Type> Matrix<Type>::inverse() {
     std::pair<Matrix, Matrix> LU = this->LUDecomposition();
     int size = LU.first.getRows();
 
-    DEBUG(LU.first);
-    DEBUG(LU.second);
-
-
     std::cout << LU.first << std::endl;
     std::cout << LU.second << std::endl;
 
     Matrix<Type> inverse_L(size, size);
     Matrix<Type> inverse_matrix(size, size);
     Matrix<Type> I(size, size, fill::eye);
-
-    DEBUG(inverse_L);
-    DEBUG(inverse_matrix);
-    DEBUG(I);
 
     for (int k = 0; k < size; ++k) {
         for (int i = 0; i < size; ++i) {
@@ -324,8 +316,6 @@ Matrix<Type> Matrix<Type>::inverse() {
                 sum += LU.first(i, j) * inverse_L(j, k);
             }
 
-            DEBUG(sum);
-            DEBUG(I(i, k));
             inverse_L(i, k) = (I(i, k) - sum) / LU.first(i, i);
         }
     }
@@ -340,9 +330,6 @@ Matrix<Type> Matrix<Type>::inverse() {
             inverse_matrix(i, k) = (inverse_L(i, k) - sum) / LU.second(i, i);
         }
     }
-
-    DEBUG(inverse_L);
-    DEBUG(inverse_matrix);
 
     return inverse_matrix;
 }
@@ -510,6 +497,34 @@ template<typename Type>
 template<typename fill_type>
 Matrix<Type>::Matrix(int n, int m, const fill::fill_class<fill_type> &fill_class) : Matrix(n, m) {
     (*this).fill(fill_class);
+}
+
+template<typename T>
+Matrix<double> exp(Matrix<T> matrix) {
+    for (int i = 0; i < matrix.getRows(); ++i) {
+        for (int j = 0; j < matrix.getCols(); ++j) {
+            matrix(i, j) = exp(matrix(i, j));
+        }
+    }
+    return matrix;
+}
+
+template<typename Type>
+double Matrix<Type>::CalculateDeterminant() {
+    std::pair<Matrix, Matrix> LU = LUDecomposition();
+
+    double det_L = 1;
+    double det_U = 1;
+
+    for (int i = 0; i < LU.first.getRows(); ++i) {
+        det_L *= LU.first(i, i);
+    }
+
+    for (int i = 0; i < LU.first.getRows(); ++i) {
+        det_U *= LU.second(i, i);
+    }
+
+    return det_L * det_U;
 }
 
 #endif //HOMEWORK_MATRIX_H

@@ -37,9 +37,6 @@ void GenerateData(double n, double mx[], double vx[], double my[], double vy[], 
 
         count[id]++;
     }
-
-    DEBUG(X);
-    DEBUG(y);
 }
 
 int main(int argc, const char *argv[]) {
@@ -65,7 +62,7 @@ int main(int argc, const char *argv[]) {
 
     GenerateData(n, mx, vx, my, vy, X, y_true);
 
-    LogisticRegression<double> logistic_regression(X, Col<double>(y_true), 0.001, 100);
+    LogisticRegression<double> logistic_regression(X, Col<double>(y_true), 0.01, 1000);
     Col<int> y_pred = logistic_regression.Classify(X);
 
     ConfusionMatrix cm(y_true, y_pred, 2);

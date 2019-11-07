@@ -48,38 +48,54 @@ private:
     }
 
     void Train(Matrix<double> X, Col<double> y) {
+//        GradientDescent(X, y);
         NewtonMethod(X, y);
+    }
+
+    Matrix<double> CalculateGradient(Matrix<double> X, Col<double> y) {
+        Matrix<double> s = X * weights_;
+        Matrix<double> sigmoid_Xw = sigmoid(s);
+        return X.T() * (y - sigmoid_Xw);
     }
 
     void GradientDescent(Matrix<double> X, Col<double> y) {
         for (int i = 0; i < max_iter_; ++i) {
-            for (int j = 0; j < X.getRows(); ++j) {
-                Col<double> z = weights_.T() * Col<double>(X.row(j).T());
-                Col<double> tmp = (y[j] - sigmoid(z[0])) * Col<double>(X.row(j).T());
-                weights_ = weights_ + learning_rate_ * tmp;
-            }
+            weights_ = weights_ + learning_rate_ * CalculateGradient(X, y);
 
-            std::cout << "weights" << std::endl;
-            std::cout << weights_ << std::endl;
+//            std::cout << "weights" << std::endl;
+//            std::cout << weights_ << std::endl;
         }
 
-        std::cout << "Training Completed" << std::endl;
-        std::cout << weights_ << std::endl;
+//        std::cout << "Training Completed" << std::endl;
+//        std::cout << weights_ << std::endl;
+    }
+
+    Matrix<double> CalculateHessian(Matrix<double> X) {
+        Matrix<double> D(X.getRows(), X.getRows(), fill::eye);
+
+        for (int i = 0; i < X.getRows(); ++i) {
+            double s = (X.row(i) * weights_)[0];
+            D(i, i) = sigmoid(s) * (1 - sigmoid(s));
+        }
+
+        return X.T() * D * X;
     }
 
     void NewtonMethod(Matrix<double> X, Col<double> y) {
         for (int i = 0; i < max_iter_; ++i) {
-            Matrix<double> H = X.T() * weights_ * X;
-            std::cout << "H" << std::endl;
-            std::cout << H << std::endl;
-            std::cout << "H.inverse()" << std::endl;
-            std::cout << H.inverse() << std::endl;
-            Matrix<double> gradient = X.T() * X * (X.T() * (y - sigmoid(X.T() * y)));
-            std::cout << "gradient" << std::endl;
-            std::cout << gradient << std::endl;
-            std::cout << "H.inverse() * gradient" << std::endl;
-            std::cout << H.inverse() * gradient << std::endl;
-            weights_ = weights_ + H.inverse() * gradient;
+            Matrix<double> H = CalculateHessian(X);
+            Matrix<double> gradient = CalculateGradient(X, y);
+            DEBUG(H);
+            DEBUG(H.CalculateDeterminant());
+            double det_H = H.CalculateDeterminant();
+            if (std::isnan(det_H) || det_H == 0) {
+                std::cout << "Using steepest descent" << std::endl;
+                weights_ = weights_ + learning_rate_ * gradient;
+            } else {
+                std::cout << "Using newton method" << std::endl;
+                weights_ = weights_ + H.inverse() * gradient;
+            }
+
         }
 
         std::cout << "Training Completed" << std::endl;
@@ -88,7 +104,7 @@ private:
 
 public:
     explicit LogisticRegression(const Matrix<double> &X, const Col<double> &y, double learning_rate, int max_iter)
-            : weights_(X.getCols(), fill::rand),
+            : weights_(X.getCols(), fill::zeros),
               learning_rate_(learning_rate),
               max_iter_(max_iter) {
         Train(X, y);

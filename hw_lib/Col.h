@@ -25,7 +25,7 @@ public:
         Matrix<double> result(a.getRows(), 1);
 
         for (int i = 0; i < a.getRows(); ++i) {
-            for (int k = 0; k < a.getRows(); ++k) {
+            for (int k = 0; k < b.getRows(); ++k) {
                 result(i, 0) += a(i, k) * b[k];
             }
         }
