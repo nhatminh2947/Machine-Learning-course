@@ -8,47 +8,7 @@
 #include <ConfusionMatrix.h>
 
 
-int N_DATA = 10000;
-
-//void init() {
-//    for (int i = 0; i < 28 * 28; ++i) {
-//        for (int j = 0; j < 10; ++j) {
-//            MU_prev[i][j] = 0;
-//            MU[i][j] = distribution(generator);
-//        }
-//    }
-//
-//    for (int i = 0; i < 10; ++i) {
-//        PI[i][0] = 0.1;
-//        for (int j = 0; j < 60000; ++j) {
-//            Z[i][j] = 0.1;
-//        }
-//    }
-//}
-
-//void do_E(const InputData &data) {
-//    double p_label[10];
-//
-//    for (double &label: p_label) {
-//        label = 0;
-//    }
-//
-//    for (int image_id = 0; image_id < NUM_IMAGE; image_id++) {
-//        auto image = data.GetImage(image_id);
-//
-//        for (int label = 0; label < 10; label++) {
-//            double p_image = 1.0;
-//            for (auto pixel_id = 0; pixel_id < IMAGE_SIZE; pixel_id++) {
-//                p_image *= (image[pixel_id] == 1) ? mu[pixel_id][label] : (1 - mu[pixel_id][label]);
-//            }
-//            p_label[label] = lambda[label] * p_image;
-//        }
-//        double marginal = std::accumulate(p_label, p_label + 10, 0.0);
-//        if (marginal == 0) marginal = 1;
-//
-//        for (int label = 0; label < 10; label++) w[image_id][label] = p_label[label] / marginal;
-//    }
-//}
+int N_DATA = 60000;
 
 void E_step(Matrix<double> images, Matrix<double> mu, Matrix<double> pi, Matrix<double> &z) {
     double p_label[10];
@@ -344,21 +304,39 @@ void hw2() {
         std::cout << "No. of Iteration: " << iteration << ", Difference: " << diff << std::endl << std::endl;
         std::cout << "------------------------------------------------------------" << std::endl << std::endl;
 
-        if (diff < 20 && count > 10 && sum_Pi(pi) >= 0.95) {
+        if (diff < 20 && count > 8 && sum_Pi(pi) >= 0.95) {
+            break;
+        }
+
+        if(iteration == 10) {
             break;
         }
     }
 
+    std::cout << "DONE==================" << std::endl;
     std::vector<int> predicted = predict(X, mu, pi);
     std::vector<int> relation = decide_label(labels, predicted);
 
     for (int n = 0; n < N_DATA; ++n) {
         predicted[n] = relation[predicted[n]];
     }
+    std::cout << "DONE========AAAAAA====" << std::endl;
 
-    ConfusionMatrix cm(labels, predicted, 10);
+    for (int k = 0; k < 10; ++k) {
+        std::vector<int> true_label_k = labels;
+        std::vector<int> predicted_label_k = predicted;
 
-    std::cout << cm << std::endl;
+        for (int & label : true_label_k) {
+            label = (label == k) ? 1 : 0;
+        }
+
+        for (int & pred_label : predicted_label_k) {
+            pred_label = (pred_label == k) ? 1 : 0;
+        }
+
+        ConfusionMatrix cm(true_label_k, predicted_label_k, 2);
+        std::cout << cm << std::endl;
+    }
 
     double error_rate = 0;
     for (int i = 0; i < N_DATA; ++i) {
