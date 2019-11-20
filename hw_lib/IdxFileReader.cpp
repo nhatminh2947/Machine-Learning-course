@@ -16,9 +16,8 @@ int IdxFileReader::reverse(int i) {
     return ((int) c1 << 24U) + ((int) c2 << 16U) + ((int) c3 << 8U) + c4;
 }
 
-std::vector<Matrix<double>> IdxFileReader::ReadImages(const std::string &path) {
+Matrix<double> IdxFileReader::ReadImages(const std::string &path, int n_data) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
-    std::vector<Matrix<double>> images;
 
     if (!file.is_open()) {
         throw std::invalid_argument("File not exist!");
@@ -39,21 +38,21 @@ std::vector<Matrix<double>> IdxFileReader::ReadImages(const std::string &path) {
     n_rows = reverse(n_rows);
     n_cols = reverse(n_cols);
 
-    for (int k = 0; k < number_of_images; ++k) {
-        Matrix<double> m(28, 28);
+    Matrix<double> images(std::min(number_of_images, n_data), 28 * 28);
+    for (int k = 0; k < number_of_images && k < n_data; ++k) {
         for (int i = 0; i < n_rows; ++i) {
             for (int j = 0; j < n_cols; ++j) {
                 file.read((char *) &pixel, sizeof(pixel));
-                m(i, j) = int(pixel);
+
+                images(k, i * 28 + j) = int(pixel);
             }
         }
-        images.push_back(m);
     }
 
-    return images;
+    return images.T();
 }
 
-std::vector<int> IdxFileReader::ReadLabels(const std::string &path) {
+std::vector<int> IdxFileReader::ReadLabels(const std::string &path, int n_data) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
     std::vector<int> labels;
 
@@ -68,7 +67,7 @@ std::vector<int> IdxFileReader::ReadLabels(const std::string &path) {
     file.read((char *) &magic_number, sizeof(magic_number));
     file.read((char *) &number_of_labels, sizeof(number_of_labels));
 
-    number_of_labels = reverse(number_of_labels);
+    number_of_labels = std::min(n_data, reverse(number_of_labels));
 
     for (int k = 0; k < number_of_labels; ++k) {
         file.read((char *) &pixel, sizeof(pixel));

@@ -17,6 +17,8 @@ private:
 public:
     ConfusionMatrix(Col<int> y_true, Col<int> y_pred, int n_classes);
 
+    ConfusionMatrix(std::vector<int> y_true, std::vector<int> y_pred, int n_classes);
+
     double sensitivity();
 
     double specificity();

@@ -10,8 +10,8 @@
 
 class GaussianDataGenerator {
 private:
-    double _mean;
-    double _var;
+    double _mean{};
+    double _var{};
     std::default_random_engine generator;
     std::uniform_real_distribution<double> distribution;
 

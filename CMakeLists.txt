@@ -64,11 +64,17 @@ target_link_libraries(seq RandomLib)
 target_link_libraries(blr RandomLib)
 
 #==============================Homework 4==============================
-add_executable(logistic_regression src/HW4/LogisticRegression.cpp src/HW4/main.cpp)
+add_executable(logistic_regression src/HW4/LogisticRegression.cpp src/HW4/main_lr.cpp)
 
 target_link_libraries(logistic_regression MetricLib)
 target_link_libraries(logistic_regression RandomLib)
 target_link_libraries(logistic_regression MatrixLib)
+
+add_executable(EMAlgorithm src/HW4/main_EM.cpp)
+
+target_link_libraries(EMAlgorithm MetricLib)
+target_link_libraries(EMAlgorithm RandomLib)
+target_link_libraries(EMAlgorithm MatrixLib)
 
 #TESTING
 

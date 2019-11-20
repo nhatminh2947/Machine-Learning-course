@@ -21,6 +21,8 @@ public:
     template<typename V>
     explicit Col(Col<V> const &col);
 
+    Col<Type>();
+
     friend Matrix<double> operator*(Matrix<double> a, Col<Type> b) {
         Matrix<double> result(a.getRows(), 1);
 
@@ -103,5 +105,8 @@ Col<Type>::Col(const Col<V> &col) : Matrix<Type>(col.size(), 1) {
         this->operator[](i) = Type(col[i]);
     }
 }
+
+template<typename Type>
+Col<Type>::Col() = default;
 
 #endif //HOMEWORK_COL_H

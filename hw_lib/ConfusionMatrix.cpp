@@ -54,3 +54,10 @@ double ConfusionMatrix::sensitivity() {
 double ConfusionMatrix::specificity() {
     return 1.0 * matrix_(1, 1) / (matrix_(1, 1) + matrix_(1, 0));
 }
+
+ConfusionMatrix::ConfusionMatrix(std::vector<int> y_true, std::vector<int> y_pred, int n_classes) : matrix_(n_classes) {
+    n_classes_ = n_classes;
+    for (int i = 0; i < y_true.size(); ++i) {
+        matrix_(y_true[i], y_pred[i])++;
+    }
+}

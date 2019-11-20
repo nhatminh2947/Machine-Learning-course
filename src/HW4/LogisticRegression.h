@@ -77,7 +77,7 @@ private:
             double s = (X.row(i) * weights_)[0];
             D(i, i) = sigmoid(s) * (1 - sigmoid(s));
         }
-
+        DEBUG(D);
         return X.T() * D * X;
     }
 
@@ -85,8 +85,9 @@ private:
         for (int i = 0; i < max_iter_; ++i) {
             Matrix<double> H = CalculateHessian(X);
             Matrix<double> gradient = CalculateGradient(X, y);
+            DEBUG(gradient);
             DEBUG(H);
-            DEBUG(H.CalculateDeterminant());
+//            DEBUG(H.CalculateDeterminant());
             double det_H = H.CalculateDeterminant();
             if (std::isnan(det_H) || det_H == 0) {
                 std::cout << "Using steepest descent" << std::endl;
@@ -95,7 +96,6 @@ private:
                 std::cout << "Using newton method" << std::endl;
                 weights_ = weights_ + H.inverse() * gradient;
             }
-
         }
 
         std::cout << "Training Completed" << std::endl;

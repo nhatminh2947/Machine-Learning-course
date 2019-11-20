@@ -55,9 +55,12 @@ class Matrix {
 private:
     int n_{}, m_{};
 protected:
-    Type **data;
+    std::vector<std::vector<Type>> data;
+//    Type **data;
 public:
     Matrix(int n, int m);
+
+//    ~Matrix();
 
     template<typename fill_type>
     Matrix(int n, int m, const fill::fill_class<fill_type> &fill_class);
@@ -97,7 +100,7 @@ public:
 
     Type &operator()(int i, int j);
 
-    Type &operator()(int i, int j) const;
+    const Type &operator()(int i, int j) const;
 
     std::pair<Matrix<Type>, Matrix<Type>> LUDecomposition();
 
@@ -122,6 +125,8 @@ public:
 
     template<typename T>
     friend std::ostream &operator<<(std::ostream &out, Matrix<Type> &matrix);
+
+    static Matrix<Type> dot(Matrix<Type> a, Matrix<Type> b);
 };
 
 template<typename T>
@@ -138,7 +143,7 @@ std::ostream &operator<<(std::ostream &out, const Matrix<T> &matrix) {
 
 template<typename Type>
 Matrix<Type> Matrix<Type>::operator*(const Matrix<Type> &b) {
-    Matrix<Type> result(this->getRows(), b.getCols());
+    Matrix<Type> result(this->getRows(), b.getCols(), fill::zeros);
 
     for (int i = 0; i < this->getRows(); ++i) {
         for (int j = 0; j < b.getCols(); ++j) {
@@ -178,7 +183,7 @@ Type &Matrix<Type>::operator()(int i, int j) {
 }
 
 template<typename Type>
-Type &Matrix<Type>::operator()(int i, int j) const {
+const Type &Matrix<Type>::operator()(int i, int j) const {
     if (i >= n_) {
         throw std::out_of_range("Col index is out of range");
     }
@@ -387,31 +392,57 @@ template<typename Type>
 Matrix<Type>::Matrix(int n, int m) {
     this->n_ = n;
     this->m_ = m;
-    data = new Type *[n_];
-    for (int i = 0; i < n_; ++i) {
-        data[i] = new Type[m_];
+
+    for (int i = 0; i < n; ++i) {
+        std::vector<Type> row;
+        for (int j = 0; j < m; ++j) {
+            row.emplace_back(0);
+        }
+
+        data.emplace_back(row);
     }
 
-    for (int i = 0; i < n_; ++i) {
-        for (int j = 0; j < m_; ++j) {
-            data[i][j] = 0;
-        }
-    }
+//    data = new Type *[n_];
+//    for (size_t i = 0; i < n_; ++i) {
+//        data[i] = new Type[m_];
+//
+//        for (int j = 0; j < m_; ++j) {
+//            data[i][j] = 0;
+//        }
+//    }
+
+//    for (int i = 0; i < n_; ++i) {
+//        for (int j = 0; j < m_; ++j) {
+//            data[i][j] = 0;
+//        }
+//    }
 }
 
 template<typename Type>
 Matrix<Type>::Matrix(int n) {
+//    this->n_ = n;
+//    this->m_ = n;
+//    data = new Type *[n_];
+//    for (int i = 0; i < n; ++i) {
+//        data[i] = new Type[m_];
+//    }
+//
+//    for (int i = 0; i < n_; ++i) {
+//        for (int j = 0; j < m_; ++j) {
+//            data[i][j] = 0;
+//        }
+//    }
+
     this->n_ = n;
     this->m_ = n;
-    data = new Type *[n_];
-    for (int i = 0; i < n; ++i) {
-        data[i] = new Type[m_];
-    }
 
-    for (int i = 0; i < n_; ++i) {
-        for (int j = 0; j < m_; ++j) {
-            data[i][j] = 0;
+    for (int i = 0; i < n; ++i) {
+        std::vector<Type> row;
+        for (int j = 0; j < n; ++j) {
+            row.emplace_back(0);
         }
+
+        data.emplace_back(row);
     }
 }
 
@@ -470,7 +501,7 @@ const Matrix<Type> &Matrix<Type>::ones() {
 template<typename Type>
 const Matrix<Type> &Matrix<Type>::random() {
     std::default_random_engine generator;
-    std::normal_distribution<double> distribution(0.0, 100.0);
+    std::normal_distribution<double> distribution(0.0, 1.0);
 
     for (int i = 0; i < n_; ++i) {
         for (int j = 0; j < m_; ++j) {
@@ -526,5 +557,27 @@ double Matrix<Type>::CalculateDeterminant() {
 
     return det_L * det_U;
 }
+
+template<typename Type>
+Matrix<Type> Matrix<Type>::dot(Matrix<Type> a, Matrix<Type> b) {
+    Matrix<Type> result(a.getRows(), a.getCols());
+
+    for (int i = 0; i < a.getRows(); ++i) {
+        for (int j = 0; j < a.getCols(); ++j) {
+            result(i, j) = a(i, j) * b(i, j);
+        }
+    }
+
+    return result;
+}
+
+//template<typename Type>
+//Matrix<Type>::~Matrix() {
+//    for (int i = 0; i < n_; ++i) {
+//        delete[] data[i];
+//    }
+//    delete[] data;
+//    data = nullptr;
+//}
 
 #endif //HOMEWORK_MATRIX_H
