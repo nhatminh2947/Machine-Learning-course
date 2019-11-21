@@ -134,7 +134,7 @@ void condition_check(Matrix<double> &pi, Matrix<double> &mu, Matrix<double> &pre
     double temp = 0;
 
     for (int i = 0; i < 10; ++i) {
-        if (pi(i, 0) == 0) {
+        if (pi(i, 0) < 0.01) {
             count = 0;
             temp = 1;
 
@@ -325,10 +325,6 @@ void hw2() {
         std::cout << "------------------------------------------------------------" << std::endl << std::endl;
 
         if (diff < 20 && count > 8 && sum_Pi(pi) >= 0.95) {
-            break;
-        }
-
-        if (iteration == 10) {
             break;
         }
     }
