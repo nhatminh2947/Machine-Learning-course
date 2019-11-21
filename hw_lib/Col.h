@@ -19,7 +19,7 @@ public:
     explicit Col(Matrix<Type> matrix);
 
     template<typename V>
-    explicit Col(Col<V> const &col);
+    explicit Col(Col<V> col);
 
     Col<Type>();
 
@@ -100,7 +100,7 @@ Col<Type>::Col(int n, const fill::fill_class<fill_type> &f):Matrix<Type>(n, 1, f
 
 template<typename Type>
 template<typename V>
-Col<Type>::Col(const Col<V> &col) : Matrix<Type>(col.size(), 1) {
+Col<Type>::Col(Col<V> col) : Matrix<Type>(col.size(), 1) {
     for (int i = 0; i < col.size(); ++i) {
         this->operator[](i) = Type(col[i]);
     }

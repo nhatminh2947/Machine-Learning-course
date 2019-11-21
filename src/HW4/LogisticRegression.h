@@ -16,6 +16,7 @@ private:
     Col<double> weights_;
     double learning_rate_;
     int max_iter_;
+    bool is_gradient_;
 
     static double sigmoid(double const &x) {
         return 1.0 / (1.0 + exp(-x));
@@ -48,8 +49,14 @@ private:
     }
 
     void Train(Matrix<double> X, Col<double> y) {
-//        GradientDescent(X, y);
-        NewtonMethod(X, y);
+        if (is_gradient_) {
+            GradientDescent(X, y);
+        } else {
+            NewtonMethod(X, y);
+        }
+
+        std::cout << "w: " << std::endl;
+        std::cout << weights_ << std::endl;
     }
 
     Matrix<double> CalculateGradient(Matrix<double> X, Col<double> y) {
@@ -61,13 +68,7 @@ private:
     void GradientDescent(Matrix<double> X, Col<double> y) {
         for (int i = 0; i < max_iter_; ++i) {
             weights_ = weights_ + learning_rate_ * CalculateGradient(X, y);
-
-//            std::cout << "weights" << std::endl;
-//            std::cout << weights_ << std::endl;
         }
-
-//        std::cout << "Training Completed" << std::endl;
-//        std::cout << weights_ << std::endl;
     }
 
     Matrix<double> CalculateHessian(Matrix<double> X) {
@@ -77,33 +78,30 @@ private:
             double s = (X.row(i) * weights_)[0];
             D(i, i) = sigmoid(s) * (1 - sigmoid(s));
         }
-        DEBUG(D);
         return X.T() * D * X;
     }
 
     void NewtonMethod(Matrix<double> X, Col<double> y) {
+        int count_nm = 0;
+        int count_gra = 0;
+
         for (int i = 0; i < max_iter_; ++i) {
             Matrix<double> H = CalculateHessian(X);
             Matrix<double> gradient = CalculateGradient(X, y);
-            DEBUG(gradient);
-            DEBUG(H);
-//            DEBUG(H.CalculateDeterminant());
             double det_H = H.CalculateDeterminant();
             if (std::isnan(det_H) || det_H == 0) {
-                std::cout << "Using steepest descent" << std::endl;
+                count_gra++;
                 weights_ = weights_ + learning_rate_ * gradient;
             } else {
-                std::cout << "Using newton method" << std::endl;
+                count_nm++;
                 weights_ = weights_ + H.inverse() * gradient;
             }
         }
-
-        std::cout << "Training Completed" << std::endl;
-        std::cout << weights_ << std::endl;
     }
 
 public:
-    explicit LogisticRegression(const Matrix<double> &X, const Col<double> &y, double learning_rate, int max_iter)
+    explicit LogisticRegression(const Matrix<double> &X, const Col<double> &y, double learning_rate, int max_iter,
+                                int is_gradient)
             : weights_(X.getCols(), fill::zeros),
               learning_rate_(learning_rate),
               max_iter_(max_iter) {

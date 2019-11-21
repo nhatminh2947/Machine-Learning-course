@@ -6,6 +6,7 @@
 #include <Point.h>
 #include <IdxFileReader.h>
 #include <ConfusionMatrix.h>
+#include <iomanip>
 
 
 int N_DATA = 60000;
@@ -181,6 +182,25 @@ void print_mu(Matrix<double> mu) {
     }
 }
 
+void print_mu(Matrix<double> mu, std::vector<int> relation) {
+    mu = mu.T();
+
+    for (int class_id = 0; class_id < 10; ++class_id) {
+        for (int i = 0; i < relation.size(); ++i) {
+            if (class_id == relation[i]) {
+                std::cout << "class " << class_id << ":" << std::endl;
+                for (int j = 0; j < 28; ++j) {
+                    for (int k = 0; k < 28; ++k) {
+                        std::cout << ((mu(i, j * 28 + k) >= 0.5) ? 1 : 0) << " ";
+                    }
+                    std::cout << std::endl;
+                }
+                break;
+            }
+        }
+    }
+}
+
 std::vector<int> predict(Matrix<double> images, Matrix<double> mu, Matrix<double> pi) {
     std::vector<int> prediction;
     for (int n = 0; n < N_DATA; ++n) {
@@ -308,34 +328,40 @@ void hw2() {
             break;
         }
 
-        if(iteration == 10) {
+        if (iteration == 10) {
             break;
         }
     }
 
-    std::cout << "DONE==================" << std::endl;
     std::vector<int> predicted = predict(X, mu, pi);
     std::vector<int> relation = decide_label(labels, predicted);
 
     for (int n = 0; n < N_DATA; ++n) {
         predicted[n] = relation[predicted[n]];
     }
-    std::cout << "DONE========AAAAAA====" << std::endl;
+
+    print_mu(mu, relation);
 
     for (int k = 0; k < 10; ++k) {
+        std::cout << "Class " << k << ": " << std::endl;
         std::vector<int> true_label_k = labels;
         std::vector<int> predicted_label_k = predicted;
 
-        for (int & label : true_label_k) {
-            label = (label == k) ? 1 : 0;
+        for (int &label : true_label_k) {
+            label = (label == k) ? 0 : 1;
         }
 
-        for (int & pred_label : predicted_label_k) {
-            pred_label = (pred_label == k) ? 1 : 0;
+        for (int &pred_label : predicted_label_k) {
+            pred_label = (pred_label == k) ? 0 : 1;
         }
 
         ConfusionMatrix cm(true_label_k, predicted_label_k, 2);
         std::cout << cm << std::endl;
+
+        std::cout << "Sensitivity (Successfully predict number " << k << "): " << std::setprecision(5) << std::fixed
+                  << cm.sensitivity() << std::endl;
+        std::cout << "Specificity (Successfully predict not number " << k << "): " << std::setprecision(5) << std::fixed
+                  << cm.specificity() << std::endl;
     }
 
     double error_rate = 0;

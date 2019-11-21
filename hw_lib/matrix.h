@@ -307,9 +307,6 @@ Matrix<Type> Matrix<Type>::inverse() {
     std::pair<Matrix, Matrix> LU = this->LUDecomposition();
     int size = LU.first.getRows();
 
-    std::cout << LU.first << std::endl;
-    std::cout << LU.second << std::endl;
-
     Matrix<Type> inverse_L(size, size);
     Matrix<Type> inverse_matrix(size, size);
     Matrix<Type> I(size, size, fill::eye);

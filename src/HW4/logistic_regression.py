@@ -169,7 +169,7 @@ if __name__ == '__main__':
 
             print("min : %f, max : %f" % (np.min(Z), np.max(Z)))
             # plt.plot(ran, [l(x) for x in ran])
-            plt.show(False)
+            plt.show()
 
         if g < 1e-2:
             break
