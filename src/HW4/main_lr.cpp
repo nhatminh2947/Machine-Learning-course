@@ -71,7 +71,7 @@ int main(int argc, const char *argv[]) {
 
     GenerateData(n, mx, vx, my, vy, X, y_true);
     std::cout << "Gradient descent:" << std::endl;
-    LogisticRegression<double> lr_gradient(X, Col<double>(y_true), 0.01, 1000, true);
+    LogisticRegression<double> lr_gradient(X, Col<double>(y_true), 0.05, 1000, true);
     Col<int> y_pred = lr_gradient.Classify(X);
 
     ConfusionMatrix cm_gradient(y_true, y_pred, 2);
@@ -94,7 +94,7 @@ int main(int argc, const char *argv[]) {
 
     std::cout << "Newton's method:" << std::endl;
 
-    LogisticRegression<double> lr_newton(X, Col<double>(y_true), 0.01, 1000, false);
+    LogisticRegression<double> lr_newton(X, Col<double>(y_true), 0.05, 1000, false);
     y_pred = lr_newton.Classify(X);
 
     ConfusionMatrix cm_newton(y_true, y_pred, 2);

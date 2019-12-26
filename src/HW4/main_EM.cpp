@@ -134,7 +134,7 @@ void condition_check(Matrix<double> &pi, Matrix<double> &mu, Matrix<double> &pre
     double temp = 0;
 
     for (int i = 0; i < 10; ++i) {
-        if (pi(i, 0) < 0.01) {
+        if (pi(i, 0) == 0) {
             count = 0;
             temp = 1;
 
