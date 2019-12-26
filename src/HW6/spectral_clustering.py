@@ -4,17 +4,17 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def load_image(file, size=None):
-    im = mpimg.imread(file)
-    logging.info(im.shape)
-    logging.info(im)
+    im = Image.open(file)
+    im.thumbnail(size)
 
-    if size is not None:
-        return im
-    return im.thumbnail(size)
+    im = np.array(im)
+    logging.info(im.shape)
+
+    return im
 
 
 class SpectralClustering:
@@ -62,27 +62,39 @@ class SpectralClustering:
     def ratio_cut(self, gram_matrix):
         degree = np.diag(np.sum(gram_matrix, axis=1))
         L = degree - gram_matrix
-
+        logging.debug('L shape: {}'.format(L.shape))
         eigen_values, eigen_vectors = np.linalg.eig(L)
         idx = np.argsort(eigen_values)[1: self.n_clusters + 1]
         U = eigen_vectors[:, idx].real.astype(np.float32)
 
         return U
 
+    def clustering(self, data):
+        mu = np.random.randn(self.n_clusters, 2)
+        classification = np.random.random_integers(low=1, high=self.n_clusters, size=data.shape[0])
+
+        iterate = 0
+        while iterate < self.max_iter:
+
+
+            iterate += 1
+
     def fit(self, data):
         logging.debug(data.shape)
 
-        gram_matrix = self.custom_kernel(data)
+        weights = self.custom_kernel(data)
 
+        U = self.ratio_cut(weights)
+        logging.debug('U = {}'.format(U))
 
-
-        logging.info(gram_matrix.shape)
+        logging.info(weights.shape)
 
         return 0
 
 
 def main():
     img = load_image('./image1.png', size=(10, 10))
+    logging.debug(img)
     spectral_clustering = SpectralClustering(n_clusters=2)
     spectral_clustering.fit(img)
 
