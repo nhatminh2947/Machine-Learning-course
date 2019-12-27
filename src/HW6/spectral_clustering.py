@@ -16,19 +16,17 @@ def load_image(file, size=None):
         # im = im.crop((0, 0, 20, 20))
     width, height = im.size
     im = np.array(im, dtype=float).reshape((width * height, 3))
-    print(width)
-    print(height)
-    print(im)
 
     return im
 
 
 class SpectralClustering:
-    def __init__(self, n_clusters=2, normalized=True, max_iter=300, init='k-means++'):
+    def __init__(self, save_plot, n_clusters=2, normalized=True, max_iter=300, init='k-means++'):
         self.normalized = normalized
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         self.init = init
+        self.save_plot = save_plot
 
     def compute_rbf_kernel(self, X, gamma):
         return np.exp(-gamma * squareform(pdist(X, 'sqeuclidean')))
@@ -42,15 +40,8 @@ class SpectralClustering:
         if gamma_c is None:
             gamma_c = 1.0 / (255 * 255)
 
-        ss = rbf_kernel(coor, gamma=gamma_s)
-        cs = rbf_kernel(X, gamma=gamma_c)
-        print('sklearn spatial similarity:\n', ss)
-        print('sklearn color similarity:\n', cs)
-
         color_similarity = self.compute_rbf_kernel(X, gamma_c)
         spatial_similarity = self.compute_rbf_kernel(coor, gamma_s)
-        print('our color_similarity:\n', color_similarity)
-        print('our spatial_similarity:\n', spatial_similarity)
 
         return color_similarity * spatial_similarity
 
@@ -83,7 +74,7 @@ class SpectralClustering:
         else:
             T = self.rcut(similarity_matrix, degree_matrix)
 
-        classifications = kmeans.KMeans(n_clusters=self.n_clusters, init=self.init).fit(T)
+        classifications = kmeans.KMeans(save_plots=self.save_plot, n_clusters=self.n_clusters, init=self.init).fit(T)
 
         return classifications
 
@@ -97,16 +88,19 @@ class SpectralClustering:
 
 
 def main():
-    img = load_image('./image1.png', size=(25, 25))
-    spectral_clustering = SpectralClustering(n_clusters=4, init='k-means++')
-    classifications = spectral_clustering.fit(img)
+    methods = ['k-means++', 'random']
 
-    print('classification: ', classifications)
+    for i in range(1, 3):
+        img = load_image('./image%d.png' % i, size=(25, 25))
+        for k in range(2, 5):
+            for method in methods:
+                print('image {} n_cluster: {} {}'.format(i, k, method))
+                file = './img/image{}_{}_{}'.format(i, k, method)
+                spectral_clustering = SpectralClustering(save_plot=file, n_clusters=k, init=method)
+                classifications = spectral_clustering.fit(img).reshape(25, 25)
 
-    spectral_clustering = SpectralClustering(n_clusters=3, init='random')
-    classifications = spectral_clustering.fit(img)
-
-    print('classification: ', classifications)
+                print('classification: ', classifications)
+                print('-------------------------------------------------------------')
     #
     # clusters = clustering(n_clusters=4).fit(img)
     #

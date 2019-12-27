@@ -2,3 +2,5 @@ venv/
 Submission/
 cmake-build-debug/
 .idea/
+*.png
+__pycache__/

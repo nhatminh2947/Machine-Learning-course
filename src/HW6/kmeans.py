@@ -35,10 +35,11 @@ def init_centroids(X, n_clusters, init='k-means++'):
 
 
 class KMeans:
-    def __init__(self, init='k-means++', n_clusters=2, max_iter=300):
+    def __init__(self, save_plots, init='k-means++', n_clusters=2, max_iter=300):
         self.max_iter = max_iter
         self.init = init
         self.n_clusters = n_clusters
+        self.save_plots = save_plots
 
     def fit(self, X):
         global classifications
@@ -56,10 +57,13 @@ class KMeans:
 
             error = self.calculate_error(old_centroids, centroids)
             print('error: ', error)
+
+            plt.matshow(classifications.reshape(25, 25))
+            plt.savefig('{}_{}.png'.format(self.save_plots, i))
+
             if error < 1e-6:
                 break
 
-        print('centroids', centroids)
         return classifications
 
     def calculate_error(self, old_centroids, new_centroids):
