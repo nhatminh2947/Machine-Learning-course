@@ -2,6 +2,7 @@ import numpy as np
 from scipy.spatial.distance import cdist, sqeuclidean
 import matplotlib.pyplot as plt
 
+
 def k_mean_plus_plus_init(X, n_clusters):
     n_samples, n_features = X.shape
     centers = []
@@ -10,7 +11,6 @@ def k_mean_plus_plus_init(X, n_clusters):
 
     for i in range(1, n_clusters):
         distance = cdist(X, centers)
-        print('distance: ', distance)
         center_id = np.argmax(distance[np.arange(n_samples), np.argmin(distance, axis=1)])
         centers = np.vstack((centers, X[center_id]))
 
@@ -63,21 +63,3 @@ class KMeans:
             error += sqeuclidean(old_centroids[i], new_centroids[i])
 
         return error
-
-
-a = np.random.random(size=(100, 2))
-print('a: ', a)
-predicted = KMeans(n_clusters=3).fit(a)
-
-print(predicted)
-c1 = a[np.where(predicted == 0)]
-c2 = a[np.where(predicted == 1)]
-c3 = a[np.where(predicted == 2)]
-print(c1)
-print(c2)
-
-plt.scatter(c1[:, 0], c1[:, 1])
-plt.scatter(c2[:, 0], c2[:, 1])
-plt.scatter(c3[:, 0], c3[:, 1])
-
-plt.show()
