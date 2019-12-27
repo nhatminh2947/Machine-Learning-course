@@ -11,7 +11,12 @@ def k_mean_plus_plus_init(X, n_clusters):
 
     for i in range(1, n_clusters):
         distance = cdist(X, centers)
-        center_id = np.argmax(distance[np.arange(n_samples), np.argmin(distance, axis=1)])
+        # center_id = np.argmax(distance[np.arange(n_samples), np.argmin(distance, axis=1)])
+        distance = distance[np.arange(n_samples), np.argmin(distance, axis=1)]
+        distance = distance / distance.sum()
+
+        center_id = np.random.choice(n_samples, 1, p=distance)
+
         centers = np.vstack((centers, X[center_id]))
 
     return centers
@@ -50,11 +55,11 @@ class KMeans:
                 centroids[k] = np.mean(X[ids, :], axis=0)
 
             error = self.calculate_error(old_centroids, centroids)
-
+            print('error: ', error)
             if error < 1e-6:
                 break
 
-        print('centers', centroids)
+        print('centroids', centroids)
         return classifications
 
     def calculate_error(self, old_centroids, new_centroids):
