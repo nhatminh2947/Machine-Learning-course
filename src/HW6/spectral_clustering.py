@@ -37,10 +37,10 @@ class SpectralClustering:
         coor = np.array([[i // n_cols, i % n_cols] for i in range(n_cols * n_rows)])
 
         if gamma_s is None:
-            gamma_s = 1.0 / (100*100)
+            gamma_s = 1.0 / (100 * 100)
 
         if gamma_c is None:
-            gamma_c = 1.0 / (255*255)
+            gamma_c = 1.0 / (255 * 255)
 
         ss = rbf_kernel(coor, gamma=gamma_s)
         cs = rbf_kernel(X, gamma=gamma_c)
@@ -54,25 +54,46 @@ class SpectralClustering:
 
         return color_similarity * spatial_similarity
 
+    def ncut(self, w, d):
+        degree_matrix_sq = np.diag(np.power(np.diag(d), -0.5))
+        L_sym = np.eye(w.shape[0]) - degree_matrix_sq @ w @ degree_matrix_sq
+        eigen_values, eigen_vectors = np.linalg.eig(L_sym)
+        idx = np.argsort(eigen_values)[1: self.n_clusters + 1]
+        U = eigen_vectors[:, idx].real.astype(np.float32)
+
+        # normalized
+        sum_over_row = (np.sum(np.power(U, 2), axis=1) ** 0.5).reshape(-1, 1)
+        T = U.copy()
+        for i in range(sum_over_row.shape[0]):
+            if sum_over_row[i][0] == 0:
+                sum_over_row[i][0] = 1
+            T[i][0] /= sum_over_row[i][0]
+            T[i][1] /= sum_over_row[i][0]
+
+        return T
+
     def fit(self, X):
         n_rows = n_cols = int(np.sqrt(X.shape[0]))
+
         similarity_matrix = self.construct_similarity_matrix(X, n_rows, n_cols)
-
-        print('similarity_matrix.shape: ', similarity_matrix.shape)
-
         degree_matrix = np.diag(np.sum(similarity_matrix, axis=1))
 
-        laplacian_matrix = degree_matrix - similarity_matrix
+        if self.normalized:
+            T = self.ncut(similarity_matrix, degree_matrix)
+        else:
+            T = self.rcut(similarity_matrix, degree_matrix)
 
+        classifications = kmeans.KMeans(n_clusters=self.n_clusters, init=self.init).fit(T)
+
+        return classifications
+
+    def rcut(self, w, d):
+        laplacian_matrix = d - w
         eigen_values, eigen_vectors = np.linalg.eig(laplacian_matrix)
         idx = np.argsort(eigen_values)[1: self.n_clusters + 1]
         U = eigen_vectors[:, idx].real.astype(np.float32)
 
-        print(U.shape)
-
-        classifications = kmeans.KMeans(n_clusters=self.n_clusters, init=self.init).fit(U)
-
-        return classifications
+        return U
 
 
 def main():
