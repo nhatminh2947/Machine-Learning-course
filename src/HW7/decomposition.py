@@ -1,28 +1,48 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from PIL import Image
 import glob
 from KNN import KNN
 from scipy.spatial.distance import pdist, squareform, cdist
 
 
+def poly_kernel(X, X_hat=None, degree=2):
+    if X_hat == None:
+        X_hat = X
+
+    K = np.zeros(shape=(len(X), len(X_hat)))
+    for i in range(len(X)):
+        for j in range(len(X_hat)):
+            K[i][j] = np.power(1 + np.dot(X[i].T, X_hat[j]), degree)
+    return K
+
+
+def rbf_kernel(X, X_hat=None, gamma=1e-5):
+    if X_hat is None:
+        X_hat = X
+
+    sq_dists = cdist(X, X_hat, 'sqeuclidean')
+
+    return np.exp(-gamma * sq_dists)
+
+
 class PCA:
-    def __init__(self, X, n_components=25, kernel=None, gamma=1e-5):
+    def __init__(self, X, n_components=25, kernel=None, gamma=None, degree=2):
+        if gamma is None:
+            self.gamma = 1.0 / X.shape[1]
+        else:
+            self.gamma = gamma
+
         self.X = X
-        self.n_samples = X.shape[1]
+        self.n_samples = X.shape[0]
         self.n_components = n_components
+        self.degree = degree
         self.kernel = kernel
-        self.gamma = gamma
         self.calculate_eigen()
 
     def calculate_eigen(self):
-        self.mu = np.mean(self.X, axis=0)
-        self.X = self.X - self.mu
-
         if self.kernel == 'rbf':
-            sq_dists = pdist(self.X, 'sqeuclidean')
-            mat_sq_dists = squareform(sq_dists)
-            K = np.exp(-self.gamma * mat_sq_dists)
+            K = rbf_kernel(X=self.X, gamma=self.gamma)
+            print(K.shape)
             N = K.shape[0]
             one_n = np.ones((N, N)) / N
             K = K - one_n.dot(K) - K.dot(one_n) + one_n.dot(K).dot(one_n)
@@ -30,31 +50,35 @@ class PCA:
             eig_values, eig_vectors = np.linalg.eigh(K)
             eig_values = np.flip(eig_values)
             eig_vectors = np.flip(eig_vectors, axis=1)
-        elif self.kernel == 'linear':
-            pass
+        elif self.kernel == 'poly':
+            K = poly_kernel(X=self.X, degree=self.degree)
+            N = K.shape[0]
+            one_n = np.ones((N, N)) / N
+            K = K - one_n.dot(K) - K.dot(one_n) + one_n.dot(K).dot(one_n)
+
+            eig_values, eig_vectors = np.linalg.eigh(K)
+            eig_values = np.flip(eig_values)
+            eig_vectors = np.flip(eig_vectors, axis=1)
         else:
+            self.mu = np.mean(self.X, axis=0)
+            self.X = self.X - self.mu
             S = np.dot(self.X, self.X.T)
-            print('S.shape', S.shape)
             eig_values, eig_vectors = np.linalg.eigh(S)
             eig_vectors = np.dot(self.X.T, eig_vectors)
-            print('eig_vectors.shape:', eig_vectors.shape)
             eig_vectors = np.flip(eig_vectors, axis=1)
             eig_vectors = np.true_divide(eig_vectors, np.linalg.norm(eig_vectors, ord=2, axis=0).reshape(1, -1))
             eig_values = np.flip(eig_values)
 
-        self.eig_vectors = eig_vectors[:, :self.n_components]
-        self.eig_values = eig_values[:self.n_components]
-
-        print(self.eig_values)
-        plt.plot(self.eig_values)
-        plt.show()
+        self.eig_vectors = eig_vectors[:, :self.n_components].copy()
+        self.eig_values = eig_values[:self.n_components].copy()
 
     def transform(self, X):
         if self.kernel == 'rbf':
-            pair_dist = cdist(X.T, self.X.T, 'sqeuclidean')
-            k = np.exp(-self.gamma * pair_dist)
-
-            return k.dot(self.eig_vectors[:, :self.n_components] / self.eig_values[:self.n_components])
+            K = rbf_kernel(X, self.X, self.gamma)
+            return K.dot(self.eig_vectors / self.eig_values)
+        elif self.kernel == 'poly':
+            K = poly_kernel(X, self.X, self.degree)
+            return K.dot(self.eig_vectors / self.eig_values)
         else:
             return np.dot(X - self.mu, self.eig_vectors)
 
@@ -80,7 +104,6 @@ class LDA:
             mean_vectors.append(np.mean(self.X[self.y == c], axis=0))
         self.mean_vectors = np.asarray(mean_vectors)
 
-        print(self.mean_vectors.shape)
         d = self.X.shape[1]
         S_w = np.zeros((d, d))
 
