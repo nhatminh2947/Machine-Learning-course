@@ -1,232 +1,191 @@
-from matplotlib import cm
-from numpy.linalg import eigh
-import matplotlib.pyplot as plt
-import glob
-import PIL.Image as Image
+from PIL import Image
 import numpy as np
-
-rows = 195
-cols = 231
-
-
-def load_data(path):
-    print('Loading... %s' % path)
-    X = []
-    y = []
-
-    for id in range(0, 15):
-        filelist = glob.glob(path + 'subject' + str(id + 1).zfill(2) + "*")
-        for fname in filelist:
-            img = Image.open(fname)
-            print(img.size)
-            img = np.array(img.resize((rows, cols), Image.ANTIALIAS))
-
-            X.append(img)
-            y.append(id)
-    print('There are %d samples' % len(y))
-    return np.asarray(X), np.asarray(y)
-
-
-def fisherfaces(X, y, num_components=0):
-    y = np.asarray(y)
-    print(X.shape)
-    [n, d] = X.shape
-    c = len(np.unique(y))
-    [eigenvalues_pca, eigenvectors_pca, mu_pca] = pca(X, y, (n - c))
-    [eigenvalues_lda, eigenvectors_lda] = lda(project(eigenvectors_pca, X, mu_pca), y, num_components)
-    eigenvectors = np.dot(eigenvectors_pca, eigenvectors_lda)
-    return [eigenvalues_lda, eigenvectors, mu_pca]
-
-
-def project(W, X, mu=None):
-    if mu is None:
-        return np.dot(X, W)
-    return np.dot(X - mu, W)
-
-
-def reconstruct(W, Y, mu=None):
-    if mu is None:
-        return np.dot(Y, W.T)
-    return np.dot(Y, W.T) + mu
-
-
-def pca(X, y, num_components=0):
-    [n, d] = X.shape
-    if (num_components <= 0) or (num_components > n):
-        num_components = n
-    mu = X.mean(axis=0)
-    X = X - mu
-    if n > d:
-        C = np.dot(X.T, X)
-        [eigenvalues, eigenvectors] = np.linalg.eigh(C)
-    else:
-        C = np.dot(X, X.T)
-        [eigenvalues, eigenvectors] = np.linalg.eigh(C)
-        eigenvectors = np.dot(X.T, eigenvectors)
-        for i in range(n):
-            eigenvectors[:, i] = eigenvectors[:, i] / np.linalg.norm(eigenvectors[:, i])
-    # or simply perform an economy size decomposition
-    # eigenvectors, eigenvalues, variance = np.linalg.svd(X.T, full_matrices=False)
-    # sort eigenvectors descending by their eigenvalue
-    idx = np.argsort(-eigenvalues)
-    eigenvalues = eigenvalues[idx]
-    eigenvectors = eigenvectors[:, idx]
-    # select only num_components
-    eigenvalues = eigenvalues[0:num_components].copy()
-    eigenvectors = eigenvectors[:, 0:num_components].copy()
-    return [eigenvalues, eigenvectors, mu]
-
-
-def lda(X, y, num_components=0):
-    y = np.asarray(y)
-    [n, d] = X.shape
-    c = np.unique(y)
-    if (num_components <= 0) or (num_components > (len(c) - 1)):
-        num_components = (len(c) - 1)
-    meanTotal = X.mean(axis=0)
-    Sw = np.zeros((d, d), dtype=np.float32)
-    Sb = np.zeros((d, d), dtype=np.float32)
-    for i in c:
-        Xi = X[np.where(y == i)[0], :]
-        meanClass = Xi.mean(axis=0)
-        Sw = Sw + np.dot((Xi - meanClass).T, (Xi - meanClass))
-        Sb = Sb + n * np.dot((meanClass - meanTotal).T, (meanClass - meanTotal))
-    eigenvalues, eigenvectors = np.linalg.eig(np.linalg.inv(Sw) * Sb)
-    idx = np.argsort(-eigenvalues.real)
-    eigenvalues, eigenvectors = eigenvalues[idx], eigenvectors[:, idx]
-    eigenvalues = np.array(eigenvalues[0:num_components].real, dtype=np.float32, copy=True)
-    eigenvectors = np.array(eigenvectors[0:, 0:num_components].real, dtype=np.float32, copy=True)
-    return [eigenvalues, eigenvectors]
-
-
-def create_font(fontname='Tahoma', fontsize=10):
-    return {'fontname': fontname, 'fontsize': fontsize}
-
-
+from scipy.spatial.distance import cdist, pdist, squareform
+import matplotlib.pyplot as plt
 import os
+import re
+
+SHAPE = (60, 60)
+gamma = 1e-3
+CLASS = 15
+SUBJECT = 11
 
 
-def read_images(path, sz=None):
-    c = 0
-    X, y = [], []
-    for dirname, dirnames, filenames in os.walk(path):
-        for subdirname in dirnames:
-            subject_path = os.path.join(dirname, subdirname)
-            print(subject_path)
-            for filename in os.listdir(subject_path):
-                # try:
-                im = Image.open(os.path.join(subject_path, filename))
-                im = im.convert("L")
-                # resize to given size (if given)
-                if sz is not None:
-                    im = im.resize(sz, Image.ANTIALIAS)
-                X.append(np.asarray(im, dtype=np.uint8))
-                y.append(c)
-                # except IOError:
-                #     print("I/O error({0}): {1}".format(errno, strerror))
-                # except:
-                #     print
-                #     "Unexpected error:", sys.exc_info()[0]
-                #     raise
-            c = c + 1
-    return [X, y]
+def read_input(dirname):
+    trainfile = os.listdir(dirname)
+    data = []
+    target = []
+    totalfile = []
+    for file in trainfile:
+        totalfile.append(file)
+        filename = dirname + file
+        number = int(re.sub(r'\D', "", file.split('.')[0]))
+        target.append(number)
+        img = Image.open(filename)
+        img = img.resize(SHAPE, Image.ANTIALIAS)
+        width, height = img.size
+        pixel = np.array(img.getdata()).reshape((width * height))
+        data.append(pixel)
+    data = np.array(data)
+    target = np.array(target).reshape(-1, 1)
+    totalfile = np.array(totalfile)
+    return data, target, totalfile
 
 
-def subplot(title, images, rows, cols, sptitle="subplot", sptitles=[], colormap=cm.gray, ticks_visible=True,
-            filename=None):
-    fig = plt.figure()
-    # main title
-    fig.text(.5, .95, title, horizontalalignment='center')
-    for i in range(len(images)):
-        ax0 = fig.add_subplot(rows, cols, (i + 1))
-        plt.setp(ax0.get_xticklabels(), visible=False)
-        plt.setp(ax0.get_yticklabels(), visible=False)
-        if len(sptitles) == len(images):
-            plt.title("%s #%s" % (sptitle, str(sptitles[i])), create_font('Tahoma', 10))
-        else:
-            plt.title("%s #%d" % (sptitle, (i + 1)), create_font('Tahoma', 10))
-        plt.imshow(np.asarray(images[i]), cmap=colormap)
-    if filename is None:
-        plt.show()
-    else:
-        fig.savefig(filename)
+def compute_mean(data, target):
+    classmean = np.zeros([CLASS, data.shape[1]])
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            classmean[target[i][0] - 1][j] += data[i][j]  # target 1-based
+    for i in range(CLASS):
+        for j in range(data.shape[1]):
+            classmean[i][j] /= 9
+    allmean = np.mean(data, axis=0).reshape(-1, 1)
+    return classmean, allmean
 
 
-def asRowMatrix(X):
-    if len(X) == 0:
-        return np.array([])
-    mat = np.empty((0, X[0].size), dtype=X[0].dtype)
-    for row in X:
-        mat = np.vstack((mat, np.asarray(row).reshape(1, -1)))
-    return mat
+def compute_withinclass(data, target, classmean):
+    withinclass = np.zeros([data.shape[1], data.shape[1]])
+    for i in range(data.shape[0]):
+        dist = np.subtract(data[i], classmean[target[i][0] - 1]).reshape(data.shape[1], 1)
+        withinclass += np.matmul(dist, dist.T)
+    return withinclass
 
 
-def asColumnMatrix(X):
-    if len(X) == 0:
-        return np.array([])
-    mat = np.empty((X[0].size, 0), dtype=X[0].dtype)
-    for col in X:
-        mat = np.hstack((mat, np.asarray(col).reshape(-1, 1)))
-    return mat
+def compute_betweenclass(classmean, allmean):
+    betweenclass = np.zeros([data.shape[1], data.shape[1]])
+    for i in range(CLASS):
+        dist = np.subtract(classmean[i], allmean[i]).reshape(data.shape[1], 1)
+        betweenclass += np.matmul(dist, dist.T)
+    betweenclass *= SUBJECT
+    return betweenclass
 
 
-def normalize(X, low, high, dtype=None):
-    X = np.asarray(X)
-    minX, maxX = np.min(X), np.max(X)
-    # normalize to [0...1].
-    X = X - float(minX)
-    X = X / float((maxX - minX))
-    # scale to [low...high].
-    X = X * (high - low)
-    X = X + low
-    if dtype is None:
-        return np.asarray(X)
-    return np.asarray(X, dtype=dtype)
+def compute_eigen(A):
+    eigenvalues, eigenvectors = np.linalg.eigh(A)
+    idx = eigenvalues.argsort()[::-1]  # sort largest
+    return eigenvectors[:, idx][:, :25]
 
 
-from pca_lda.KNN import KNN
+def visualization(dirname, totalfile, storedir, data):
+    idx = 0
+    for file in totalfile:
+        filename = dirname + file
+        storename = storedir + file
+        img = Image.open(filename)
+        img = img.resize(SHAPE, Image.ANTIALIAS)
+        width, height = img.size
+        pixel = img.load()
+        pixel = data[idx].reshape(width, height).copy()
+        img.save(storename + '.png')
+        idx += 1
+
+
+def draweigenface(storedir, eigen_vectors):
+    title = "LDA Fisher-Face" + '_'
+    eigen_vectors = eigen_vectors.T
+    for i in range(0, 25):
+        plt.clf()
+        plt.suptitle(title + str(i))
+        plt.imshow(eigen_vectors[i].reshape(SHAPE), plt.cm.gray)
+        plt.savefig(storedir + title + str(i) + '.png')
+
+
+def KNN(traindata, testdata, target):
+    trainsize = traindata.shape[0]
+    testsize = testdata.shape[0]
+    result = np.zeros(testsize)
+    for testidx in range(testsize):
+        alldist = np.zeros(trainsize)
+        for trainidx in range(trainsize):
+            alldist[trainidx] = np.sqrt(np.sum((testdata[testidx] - traindata[trainidx]) ** 2))
+        result[testidx] = target[np.argmin(alldist)]
+    return result
+
+
+def checkperformance(targettest, predict):
+    correct = 0
+    for i in range(len(targettest)):
+        if targettest[i] == predict[i]:
+            correct += 1
+    print("Accuracy of LDA = {}  ({} / {})".format(correct / len(targettest), correct, len(targettest)))
+
+
+def kernelLDA(data, target, method):
+    gram_matrix = None
+    if method == 'rbf':
+        sq_dists = squareform(pdist(data), 'sqeuclidean')
+        gram_matrix = np.exp(-gamma * sq_dists)
+    elif method == 'linear':
+        gram_matrix = np.matmul(data, data.T)
+
+    M = np.zeros([data.shape[0], data.shape[0]])
+    for i in range(CLASS):
+        classM = gram_matrix[np.where(target == i + 1)[0]].copy()
+        classM = np.sum(classM, axis=0).reshape(-1, 1) / SUBJECT
+        allM = gram_matrix[np.where(target == i + 1)[0]].copy()
+        allM = np.sum(allM, axis=0).reshape(-1, 1) / data.shape[0]
+        dist = np.subtract(classM, allM)
+        multiplydist = SUBJECT * np.matmul(dist, dist.T)
+        M += multiplydist
+
+    N = np.zeros([data.shape[0], data.shape[0]])
+    I_minus_one = np.identity(SUBJECT) - (SUBJECT * np.ones((SUBJECT, SUBJECT)))
+    for i in range(CLASS):
+        Kj = gram_matrix[np.where(target == i + 1)[0]].copy()
+        multiply = np.matmul(Kj.T, np.matmul(I_minus_one, Kj))
+        N += multiply
+
+    eigenvectors = compute_eigen(np.matmul(np.linalg.pinv(N), M))
+    lower_dimension_data = np.matmul(gram_matrix, eigenvectors)
+    return lower_dimension_data
+
 
 if __name__ == '__main__':
+    # LDA
+    dirtrain = './Yale_Face_Database/Training/'
+    dirtest = './Yale_Face_Database/Testing/'
+    storedir = './'
+    data, target, totalfile = read_input(dirtrain)
+    datatest, targettest, totalfiletest = read_input(dirtest)
+    # data = np.concatenate((data, datatest), axis=0)  # data : 165 x 3600,
+    # target = np.concatenate((target, targettest), axis=0)  # target : 165 x 1
+    classmean, allmean = compute_mean(data, target)  # classmean : 15 x 3600, allmean : 3600 x 1
+    print(allmean)
+    print(classmean)
+    withinclass = compute_withinclass(data, target, classmean)
+    betweenclass = compute_betweenclass(classmean, allmean)
 
-    # read images
-    [X, y] = load_data('Yale_Face_Database/Training/')
-    print(X)
-    # perform a full pca
-    # print(X.size)
-    [D, W, mu] = fisherfaces(asRowMatrix(X), y)
-    # import colormaps
-    import matplotlib.cm as cm
+    print(withinclass)
+    print(betweenclass)
+    eigenvectors = compute_eigen(np.matmul(np.linalg.pinv(withinclass), betweenclass))
+    print(eigenvectors.shape)
+    lower_dimension_data = np.matmul(data, eigenvectors)
+    lower_dimension_data_train = lower_dimension_data[:totalfile.shape[0]].copy()
+    lower_dimension_data_test = lower_dimension_data[totalfile.shape[0]:].copy()
+    targettrain = target[:totalfile.shape[0]].copy()
+    targettest = target[totalfile.shape[0]:].copy()
+    reconstruct_data = np.matmul(lower_dimension_data_train, eigenvectors.T)
+    visualization(dirtrain, totalfile, storedir, reconstruct_data)
+    draweigenface(storedir, eigenvectors)
+    predict = KNN(lower_dimension_data_train, lower_dimension_data_test, targettrain)
+    checkperformance(targettest, predict)
 
-    # turn the first (at most) 16 eigenvectors into grayscale
-    # images (note: eigenvectors are stored by column!)
-    E = []
-    for i in range(min(W.shape[1], 16)):
-        e = W[:, i].reshape(X[0].shape)
-        print(e.shape)
-        E.append(normalize(e, 0, 255))
-    # plot them and store the plot to "python_fisherfaces_fisherfaces.pdf"
-    subplot(title="Fisherfaces AT&T Facedatabase", images=E, rows=4, cols=4, sptitle="Fisherface", colormap=cm.gray,
-            filename="python_fisherfaces_fisherfaces.png")
+    print("=======================================================================")
 
-    print(W.shape)
-    E = []
-    for i in range(min(W.shape[1], 16)):
-        e = W[:, i].reshape(-1, 1)
-        P = project(e, X[0].reshape(1, -1), mu)
-        R = reconstruct(e, P, mu)
-        # reshape and append to plots
-        R = R.reshape(X[0].shape)
-        E.append(normalize(R, 0, 255))
-    # plot them and store the plot to "python_reconstruction.pdf"
-    subplot(title="Fisherfaces Reconstruction Yale FDB", images=E, rows=4, cols=4, sptitle="Fisherface",
-            colormap=cm.gray, filename="python_fisherfaces_reconstruction.png")
-
-    P = project(W, asRowMatrix(X), mu)
-
-    print(P.shape)
-    X_test, y_test = load_data('Yale_Face_Database/Testing/')
-    knn = KNN(k=1)
-    knn.fit(P, y)
-    predictions = knn.predict(project(W, asRowMatrix(X_test), mu))
-    print(predictions)
-    print(np.count_nonzero(predictions == y_test))
+    # Kernel LDA
+    dirtrain = './Training/'
+    dirtest = './Testing/'
+    storedir = './LDA_result/'
+    method = 'linear'
+    data, target, totalfile = read_input(dirtrain)
+    datatest, targettest, totalfiletest = read_input(dirtest)
+    data = np.concatenate((data, datatest), axis=0)  # data : 165 x 3600,
+    target = np.concatenate((target, targettest), axis=0)  # target : 165 x 1
+    lower_dimension_data = kernelLDA(data, target, method)
+    lower_dimension_data_train = lower_dimension_data[:totalfile.shape[0]].copy()
+    lower_dimension_data_test = lower_dimension_data[totalfile.shape[0]:].copy()
+    targettrain = target[:totalfile.shape[0]].copy()
+    targettest = target[totalfile.shape[0]:].copy()
+    predict = KNN(lower_dimension_data_train, lower_dimension_data_test, targettrain)
+    checkperformance(targettest, predict)

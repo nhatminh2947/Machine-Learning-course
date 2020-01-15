@@ -112,6 +112,7 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0):
     """
 
     # Check inputs
+    global Q
     if isinstance(no_dims, float):
         print("Error: array X should have type float.")
         return -1
@@ -177,7 +178,31 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0):
             P = P / 4.
 
     # Return solution
-    return Y
+    return Y, P, Q
+
+
+def visualize(Y, P, Q, iter, perplexity, labels):
+    ids = labels.argsort()
+    P = P[ids, :][:, ids]
+    Q = Q[ids, :][:, ids]
+
+    # fig, ax = pylab.subplots()
+    # pylab.title('t-SNE_' + str(iter) + '.png')
+    # scatter = ax.scatter(Y[:, 0], Y[:, 1], 20, c=labels, cmap='tab10')
+    # legend1 = ax.legend(*scatter.legend_elements(), title="Classes")
+    # ax.add_artist(legend1)
+    # fig.savefig('../images/gif/tsne/tsne_{}.png'.format(iter))
+    # pylab.close()
+
+    pylab.title('Pairwise Similarities in High-Dimensional space of t-SNE')
+    pylab.imshow(P, cmap='Reds')
+    pylab.savefig('../images/gif/tsne/tsne_high_dimensional_space_{}_{}.png'.format(iter, perplexity))
+    pylab.close()
+
+    pylab.title('Pairwise Similarities in Low-Dimensional space of t-SNE')
+    pylab.imshow(Q, cmap='Reds')
+    pylab.savefig('../images/gif/tsne/tsne_low_dimensional_space_{}_{}.png'.format(iter, perplexity))
+    pylab.close()
 
 
 if __name__ == "__main__":
@@ -185,12 +210,15 @@ if __name__ == "__main__":
     print("Running example on 2,500 MNIST digits...")
     X = np.loadtxt("mnist2500_X.txt")
     labels = np.loadtxt("mnist2500_labels.txt")
-    perplexities = [16, 32, 64, 128, 256, 512]
-    for perplexity in perplexities:
-        Y = tsne(X, 2, 50, perplexity)
-        fig, ax = pylab.subplots()
-        scatter = ax.scatter(Y[:, 0], Y[:, 1], 20, c=labels)
-        legend1 = ax.legend(*scatter.legend_elements(), title="Classes")
-        ax.add_artist(legend1)
-        fig.savefig('../images/tsne_{}.png'.format(perplexity))
-        pylab.close()
+
+    for i in range(5, 6):
+        perplexity = 2 ** i
+        Y, P, Q = tsne(X, 2, 50, perplexity)
+        visualize(Y, P, Q, 1000, perplexity, labels)
+        # fig, ax = pylab.subplots()
+        # scatter = ax.scatter(Y[:, 0], Y[:, 1], 20, c=labels, cmap='tab10')
+        # legend1 = ax.legend(*scatter.legend_elements(), title="Classes")
+        # ax.set_title('t-SNE_' + str(perplexity) + '.png')
+        # ax.add_artist(legend1)
+        # fig.savefig('../images/tsne_{}.png'.format(perplexity))
+        # pylab.close()

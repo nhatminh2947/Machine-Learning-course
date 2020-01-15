@@ -113,6 +113,7 @@ def ssne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0):
     """
 
     # Check inputs
+    global Q
     if isinstance(no_dims, float):
         print("Error: array X should have type float.")
         return -1
@@ -169,13 +170,38 @@ def ssne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0):
         if (iter + 1) % 10 == 0:
             C = np.sum(P * np.log(P / Q))
             print("Iteration %d: error is %f" % (iter + 1, C))
+            # visualize(Y, P, Q, iter + 1, perplexity)
 
         # Stop lying about P-values
         if iter == 100:
             P = P / 4.
 
     # Return solution
-    return Y
+    return Y, P, Q
+
+
+def visualize(Y, P, Q, iter, perplexity):
+    ids = labels.argsort()
+    P = P[ids, :][:, ids]
+    Q = Q[ids, :][:, ids]
+
+    # fig, ax = pylab.subplots()
+    # pylab.title('Symmetric SNE_' + str(iter) + '.png')
+    # scatter = ax.scatter(Y[:, 0], Y[:, 1], 20, c=labels, cmap='tab10')
+    # legend1 = ax.legend(*scatter.legend_elements(), title="Classes")
+    # ax.add_artist(legend1)
+    # fig.savefig('../images/gif/ssne/ssne_{}.png'.format(iter))
+    # pylab.close()
+
+    pylab.title('Pairwise Similarities in High-Dimensional space of SSNE')
+    pylab.imshow(P, cmap='Reds')
+    pylab.savefig('../images/gif/ssne/ssne_high_dimensional_space_{}_{}.png'.format(iter, perplexity))
+    pylab.close()
+
+    pylab.title('Pairwise Similarities in Low-Dimensional space of SSNE')
+    pylab.imshow(Q, cmap='Reds')
+    pylab.savefig('../images/gif/ssne/ssne_low_dimensional_space_{}_{}.png'.format(iter, perplexity))
+    pylab.close()
 
 
 if __name__ == "__main__":
@@ -183,12 +209,14 @@ if __name__ == "__main__":
     print("Running example on 2,500 MNIST digits...")
     X = np.loadtxt("mnist2500_X.txt")
     labels = np.loadtxt("mnist2500_labels.txt")
-    perplexities = [16, 32, 64, 128, 256, 512]
-    for perplexity in perplexities:
-        Y = ssne(X, 2, 50, perplexity)
-        fig, ax = pylab.subplots()
-        scatter = ax.scatter(Y[:, 0], Y[:, 1], 20, c=labels)
-        legend1 = ax.legend(*scatter.legend_elements(), title="Classes")
-        ax.add_artist(legend1)
-        fig.savefig('../images/ssne_{}.png'.format(perplexity))
-        pylab.close()
+    for i in range(5, 6):
+        perplexity = 2 ** i
+        Y, P, Q = ssne(X, 2, 50, perplexity)
+        visualize(Y, P, Q, 1000, perplexity)
+        # fig, ax = pylab.subplots()
+        # scatter = ax.scatter(Y[:, 0], Y[:, 1], 20, c=labels, cmap='tab10')
+        # legend1 = ax.legend(*scatter.legend_elements(), title="Classes")
+        # ax.set_title('Symmetric SNE_' + str(perplexity) + '.png')
+        # ax.add_artist(legend1)
+        # fig.savefig('../images/ssne_{}.png'.format(perplexity))
+        # pylab.close()
