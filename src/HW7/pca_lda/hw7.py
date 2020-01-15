@@ -78,7 +78,7 @@ if __name__ == '__main__':
     # # predict with knn
     # X_test, y_test = load_data(test_data_path)
     #
-    # knn = KNN(k=5)
+    # knn = KNN(k=1)
     # knn.fit(X_transformed, y_train)
     #
     # predictions = knn.predict(pca.transform(X_test), k_neighbors=5)
@@ -86,13 +86,13 @@ if __name__ == '__main__':
     # false_positive = np.count_nonzero(predictions != y_test)
     # precision = 1.0 * true_positive / (true_positive + false_positive)
     # print('k_neighbors: %d precision: %.5f' % (5, precision))
-    #
+    # #
     # print('============================ Kernel PCA RBF ============================')
     # X_train, y_train = load_data(train_data_path)
     # kernel_pca = PCA(X_train, n_components=25, kernel='rbf', gamma=1e-9)
     # X_train_transformed = kernel_pca.transform(X_train)
     #
-    # knn = KNN(k=5)
+    # knn = KNN(k=1)
     # knn.fit(X_train_transformed, y_train)
     #
     # X_test, y_test = load_data(test_data_path)
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     # kernel_pca = PCA(X_train, n_components=25, kernel='poly', degree=3)
     # X_train_transformed = kernel_pca.transform(X_train)
     #
-    # knn = KNN(k=5)
+    # knn = KNN(k=1)
     # knn.fit(X_train_transformed, y_train)
     #
     # X_test, y_test = load_data(test_data_path)
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     # false_positive = np.count_nonzero(predictions != y_test)
     # precision = 1.0 * true_positive / (true_positive + false_positive)
     # print('k_neighbors: %d precision: %.5f' % (5, precision))
-
+    #
     # print('============================ LDA ============================')
     #
     # X_train, y_train = load_data(train_data_path)
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     # X_reconstruct = lda.reconstruct(X_transformed[ids, :])
     # plot_reconstruct(X_reconstruct, (rows, cols))
     #
-    # knn = KNN(k=5)
+    # knn = KNN(k=1)
     # knn.fit(X_transformed, y_train)
     #
     # predictions = knn.predict(lda.transform(X_test))
@@ -142,20 +142,32 @@ if __name__ == '__main__':
     # precision = 1.0 * true_positive / (true_positive + false_positive)
     # print('k_neighbors: %d precision: %.5f' % (5, precision))
 
-    print('============================ Kernel LDA ============================')
+    print('============================ LDA - Kernel RBF ============================')
 
     X_train, y_train = load_data(train_data_path)
     X_test, y_test = load_data(test_data_path)
 
-    lda = LDA(X_train, y_train, kernel='rbf', gamma=1e-9, n_components=25)
+    lda = LDA(X_train, y_train, kernel='rbf', gamma=1e-7, n_components=25)
 
-    ids = np.random.randint(0, 135, size=10)
     X_transformed = lda.transform(X_train)
+    knn = KNN(k=1)
+    knn.fit(X_transformed, y_train)
 
-    X_reconstruct = lda.reconstruct(X_transformed[ids, :])
-    plot_reconstruct(X_reconstruct, (rows, cols))
+    predictions = knn.predict(lda.transform(X_test))
+    true_positive = np.count_nonzero(predictions == y_test)
+    false_positive = np.count_nonzero(predictions != y_test)
+    precision = 1.0 * true_positive / (true_positive + false_positive)
+    print('k_neighbors: %d precision: %.5f' % (5, precision))
 
-    knn = KNN(k=5)
+    print('============================ LDA - Kernel Poly ============================')
+
+    X_train, y_train = load_data(train_data_path)
+    X_test, y_test = load_data(test_data_path)
+
+    lda = LDA(X_train, y_train, kernel='poly', degree=2, n_components=25)
+
+    X_transformed = lda.transform(X_train)
+    knn = KNN(k=1)
     knn.fit(X_transformed, y_train)
 
     predictions = knn.predict(lda.transform(X_test))

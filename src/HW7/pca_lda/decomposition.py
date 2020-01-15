@@ -88,7 +88,7 @@ class LDA:
         self.gamma = gamma
         self.degree = degree
         self.n_classes = np.amax(y) + 1
-        self.n_samples = X.shape[1]
+        self.n_samples = X.shape[0]
         self.n_components = n_components
         self.calculate_eigen()
 
@@ -126,22 +126,24 @@ class LDA:
             elif self.kernel == 'poly':
                 K = poly_kernel(X=self.X, degree=self.degree)
 
-            S_b = np.zeros([self.X.shape[0], self.X.shape[0]])
-            for i in range(self.n_classes):
-                classM = K[np.where(self.y == i)[0]].copy()
-                classM = np.sum(classM, axis=0).reshape(-1, 1) / 9
-                allM = K[np.where(self.y == i)[0]].copy()
-                allM = np.sum(allM, axis=0).reshape(-1, 1) / self.X.shape[0]
-                dist = np.subtract(classM, allM)
-                multiplydist = 9 * np.matmul(dist, dist.T)
-                S_b += multiplydist
+            overall_mean = np.mean(K, axis=0).reshape(-1, 1)
 
-            S_w = np.zeros([self.X.shape[0], self.X.shape[0]])
+            mean_vectors = []
+            for c in range(self.n_classes):
+                mean_vectors.append(np.mean(K[self.y == c], axis=0))
+            self.mean_vectors = np.asarray(mean_vectors)
+
+            S_b = np.zeros([self.n_samples, self.n_samples])
+            for i, mean_vector in enumerate(self.mean_vectors):
+                n = self.X[self.y == i].shape[0]
+                mean_vector = mean_vector.reshape(-1, 1)
+                S_b += n * (mean_vector - overall_mean).dot((mean_vector - overall_mean).T)
+
+            S_w = np.zeros([self.n_samples, self.n_samples])
             I_minus_one = np.identity(9) - (9 * np.ones((9, 9)))
             for i in range(self.n_classes):
-                Kj = K[np.where(self.y == i)[0]].copy()
-                multiply = np.matmul(Kj.T, np.matmul(I_minus_one, Kj))
-                S_w += multiply
+                Ki = K[self.y == i].copy()
+                S_w += Ki.T.dot(I_minus_one.dot(Ki))
 
             eig_values, eig_vectors = np.linalg.eigh(np.linalg.pinv(S_w).dot(S_b))
             self.eig_vectors = eig_vectors
@@ -152,10 +154,13 @@ class LDA:
 
             self.w = np.hstack([eigen_pair[1].reshape(-1, 1).real for eigen_pair in eigen_pairs[:self.n_components]])
 
-            # lower_dimension_data = np.matmul(K, self.w)
-            # return lower_dimension_data
-
     def transform(self, X):
+        if self.kernel == 'rbf':
+            K = rbf_kernel(X, self.X, self.gamma)
+            return K.dot(self.eig_vectors)
+        elif self.kernel == 'poly':
+            K = poly_kernel(X, self.X, self.degree)
+            return K.dot(self.eig_vectors)
         return X.dot(self.w)
 
     def reconstruct(self, X):
